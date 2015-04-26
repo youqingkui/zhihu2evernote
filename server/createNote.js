@@ -15,7 +15,6 @@
     ourNote.title = noteTitle;
     ourNote.content = nBody;
     ourNote.attributes = attr;
-    console.log(nBody);
     if (parentNotebook && parentNotebook.guid) {
       ourNote.notebookGuid = parentNotebook.guid;
     }

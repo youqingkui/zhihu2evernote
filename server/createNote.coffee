@@ -13,7 +13,7 @@ makeNote = (noteStore, noteTitle, noteBody, sourceUrl, parentNotebook, callback)
   ourNote.title = noteTitle
   ourNote.content = nBody
   ourNote.attributes = attr
-  console.log nBody
+#  console.log nBody
 
   # parentNotebook is optional; if omitted, default notebook is used
   if parentNotebook and parentNotebook.guid

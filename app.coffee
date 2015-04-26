@@ -24,15 +24,33 @@ request.get op, (err, res, body) ->
 
   answerList = $("#zh-list-answer-wrap > div")
 
-  $ = cheerio.load(answerList[0])
-  title = $("h2.zm-item-title").text()
-  content1 = $(".content.hidden").text().replace(/<br>/g, '</br>')
+  $1 = cheerio.load(answerList[1])
+  title = $1("h2.zm-item-title").text()
+  content1 = $1(".content.hidden").text().replace(/<br>/g, '<br/>')
+  console.log "content1  ====="
   console.log content1
-  $2 = cheerio.load(content1)
-  $2("a, span").removeAttr("class").removeAttr("href")
-  content2 = $2.html()
+  console.log "content1  ===== \n"
+  $2 = cheerio.load(content1, {decodeEntities: false})
+  # 移除其他属性
+  $2("a, span, img, i").removeAttr("class").removeAttr("href")
+  .removeAttr('data-rawwidth').removeAttr('data-rawheight')
+  .removeAttr('data-original').removeAttr('data-hash')
+  .removeAttr('data-editable').removeAttr('data-title')
+  .removeAttr('data-tip')
+
+#  imgs = $2("img")
+#  imgs.each (idx, element) ->
+#    src = $2(element).attr('src')
+#    height = $2(element).attr('height')
+#    width = $2(element).attr('width')
+#    newTag = $("<img src=#{src} width=#{width} height=#{height} />")
+#    $2(element).replaceWith(newTag)
+
+
+  content2 = $2.html({xmlMode:true})
+  console.log "content2 ======"
   console.log content2
-  content3 = "<img src='http://pic3.zhimg.com/31fa9c0fdbe89aa0464c1110cc3c0382_r.jpg'/>"
-  makeNote noteStore, title, content3,'http://www.zhihu.com/collection/29469118', (err1, note) ->
+  console.log "content2 ======"
+  makeNote noteStore, title, content2,'http://www.zhihu.com/collection/29469118', (err1, note) ->
     return console.log err1 if err1
     console.log note

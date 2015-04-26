@@ -31,22 +31,29 @@
   op = reqOp('http://www.zhihu.com/collection/29469118');
 
   request.get(op, function(err, res, body) {
-    var $, $2, answerList, content1, content2, content3, title;
+    var $, $1, $2, answerList, content1, content2, title;
     if (err) {
       return console.log(err);
     }
     $ = cheerio.load(body);
     answerList = $("#zh-list-answer-wrap > div");
-    $ = cheerio.load(answerList[0]);
-    title = $("h2.zm-item-title").text();
-    content1 = $(".content.hidden").text().replace(/<br>/g, '</br>');
+    $1 = cheerio.load(answerList[1]);
+    title = $1("h2.zm-item-title").text();
+    content1 = $1(".content.hidden").text().replace(/<br>/g, '<br/>');
+    console.log("content1  =====");
     console.log(content1);
-    $2 = cheerio.load(content1);
-    $2("a, span").removeAttr("class").removeAttr("href");
-    content2 = $2.html();
+    console.log("content1  ===== \n");
+    $2 = cheerio.load(content1, {
+      decodeEntities: false
+    });
+    $2("a, span, img, i").removeAttr("class").removeAttr("href").removeAttr('data-rawwidth').removeAttr('data-rawheight').removeAttr('data-original').removeAttr('data-hash').removeAttr('data-editable').removeAttr('data-title').removeAttr('data-tip');
+    content2 = $2.html({
+      xmlMode: true
+    });
+    console.log("content2 ======");
     console.log(content2);
-    content3 = "<img src='http://pic3.zhimg.com/31fa9c0fdbe89aa0464c1110cc3c0382_r.jpg'/>";
-    return makeNote(noteStore, title, content3, 'http://www.zhihu.com/collection/29469118', function(err1, note) {
+    console.log("content2 ======");
+    return makeNote(noteStore, title, content2, 'http://www.zhihu.com/collection/29469118', function(err1, note) {
       if (err1) {
         return console.log(err1);
       }
