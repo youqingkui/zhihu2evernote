@@ -4,7 +4,7 @@
 
   Evernote = require('evernote').Evernote;
 
-  makeNote = function(noteStore, noteTitle, noteBody, sourceUrl, parentNotebook, callback) {
+  makeNote = function(noteStore, noteTitle, noteBody, sourceUrl, resources, parentNotebook, callback) {
     var attr, nBody, ourNote;
     nBody = '<?xml version="1.0" encoding="UTF-8"?>';
     nBody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">';
@@ -15,6 +15,7 @@
     ourNote.title = noteTitle;
     ourNote.content = nBody;
     ourNote.attributes = attr;
+    ourNote.resources = resources;
     if (parentNotebook && parentNotebook.guid) {
       ourNote.notebookGuid = parentNotebook.guid;
     }

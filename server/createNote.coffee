@@ -1,6 +1,6 @@
 Evernote = require('evernote').Evernote
 
-makeNote = (noteStore, noteTitle, noteBody, sourceUrl, parentNotebook, callback) ->
+makeNote = (noteStore, noteTitle, noteBody, sourceUrl, resources, parentNotebook, callback) ->
   nBody = '<?xml version="1.0" encoding="UTF-8"?>'
   nBody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
 
@@ -13,6 +13,7 @@ makeNote = (noteStore, noteTitle, noteBody, sourceUrl, parentNotebook, callback)
   ourNote.title = noteTitle
   ourNote.content = nBody
   ourNote.attributes = attr
+  ourNote.resources = resources
 #  console.log nBody
 
   # parentNotebook is optional; if omitted, default notebook is used
