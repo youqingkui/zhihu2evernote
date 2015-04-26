@@ -20,7 +20,8 @@
     }
     return noteStore.createNote(ourNote, function(err, note) {
       if (err) {
-        return console.log(err);
+        console.log(err);
+        return console.log(noteTitle);
       } else {
         return callback(note);
       }

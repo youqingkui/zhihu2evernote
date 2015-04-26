@@ -31,33 +31,40 @@
   op = reqOp('http://www.zhihu.com/collection/29469118');
 
   request.get(op, function(err, res, body) {
-    var $, $1, $2, answerList, content1, content2, title;
+    var $, answerList, oldTitle;
     if (err) {
       return console.log(err);
     }
-    $ = cheerio.load(body);
+    $ = cheerio.load(body, {});
     answerList = $("#zh-list-answer-wrap > div");
-    $1 = cheerio.load(answerList[1]);
-    title = $1("h2.zm-item-title").text();
-    content1 = $1(".content.hidden").text().replace(/<br>/g, '<br/>');
-    console.log("content1  =====");
-    console.log(content1);
-    console.log("content1  ===== \n");
-    $2 = cheerio.load(content1, {
-      decodeEntities: false
-    });
-    $2("a, span, img, i").removeAttr("class").removeAttr("href").removeAttr('data-rawwidth').removeAttr('data-rawheight').removeAttr('data-original').removeAttr('data-hash').removeAttr('data-editable').removeAttr('data-title').removeAttr('data-tip');
-    content2 = $2.html({
-      xmlMode: true
-    });
-    console.log("content2 ======");
-    console.log(content2);
-    console.log("content2 ======");
-    return makeNote(noteStore, title, content2, 'http://www.zhihu.com/collection/29469118', function(err1, note) {
-      if (err1) {
-        return console.log(err1);
+    oldTitle = '';
+    return answerList.each(function(idx, elment) {
+      var $2, content1, content2, title;
+      title = $(elment).find("h2.zm-item-title").text();
+      if (!title) {
+        title = oldTitle;
       }
-      return console.log(note);
+      oldTitle = title;
+      content1 = $(elment).find(".content.hidden").text();
+      console.log("content1  =====");
+      console.log(content1);
+      console.log("content1  ===== \n");
+      $2 = cheerio.load(content1, {
+        decodeEntities: false
+      });
+      $2("a, span, img, i, div, code").removeAttr("class").removeAttr("href").removeAttr('data-rawwidth').removeAttr('data-rawheight').removeAttr('data-original').removeAttr('data-hash').removeAttr('data-editable').removeAttr('data-title').removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt');
+      content2 = $2.html({
+        xmlMode: true
+      });
+      console.log("content2 ======");
+      console.log(content2);
+      console.log("content2 ======");
+      return makeNote(noteStore, title, content2, 'http://www.zhihu.com/collection/29469118', function(err1, note) {
+        if (err1) {
+          return console.log(err1);
+        }
+        return console.log(note);
+      });
     });
   });
 

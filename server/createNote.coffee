@@ -25,6 +25,7 @@ makeNote = (noteStore, noteTitle, noteBody, sourceUrl, parentNotebook, callback)
 # See EDAMErrorCode enumeration for error code explanation
 # http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
       console.log err
+      console.log noteTitle
     else
       callback note
 
