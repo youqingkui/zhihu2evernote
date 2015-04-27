@@ -19,67 +19,75 @@ reqOp = (url) ->
   return options
 
 
-op = reqOp('http://www.zhihu.com/collection/29469118?page=9')
-request.get op, (err, res, body) ->
-  return console.log err if err
+#request.get op, (err, res, body) ->
+#  return console.log err if err
+#
+#  $ = cheerio.load(body, {})
+#
+#  answerList = $("#zh-list-answer-wrap > div")
+#  oldTitle = ''
+#  async.eachSeries answerList, (item, callback) ->
+#
+#    title = $(item).find("h2.zm-item-title").text()
+#    if not title
+#      title = oldTitle
+#    oldTitle = title
+#    content1 = $(item).find(".content.hidden").text()
+#    console.log "content1  ====="
+#    console.log content1
+#    console.log "content1  ===== \n"
+#    $2 = cheerio.load(content1, {decodeEntities: false})
+#    # 移除其他属性
+#    $2("a, span, img, i, div, code")
+#    .removeAttr("class").removeAttr("href")
+#    .removeAttr('data-rawwidth').removeAttr('data-rawheight')
+#    .removeAttr('data-original').removeAttr('data-hash')
+#    .removeAttr('data-editable').removeAttr('data-title')
+#    .removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt')
+#
+#    # 改变IMG
+#    changeImg $2, $2("img"), (err, resourceArr) ->
+#
+#      content2 = $2.html({xmlMode:true})
+#      console.log "content2 ======"
+#      console.log content2
+#      console.log "content2 ======"
+#      makeNote noteStore, title, content2,'http://www.zhihu.com/collection/29469118', resourceArr, (err1, note) ->
+#        return console.log err1 if err1
+#        return console.log note
+#
+#
+##      callback()
+#
+#  ,(eachErr) ->
+#    return console.log eachErr if eachErr
 
-  $ = cheerio.load(body, {})
-
-  answerList = $("#zh-list-answer-wrap > div")
-  oldTitle = ''
-  async.eachSeries answerList, (item, callback) ->
-
-    title = $(item).find("h2.zm-item-title").text()
-    if not title
-      title = oldTitle
-    oldTitle = title
-    content1 = $(item).find(".content.hidden").text()
-    console.log "content1  ====="
-    console.log content1
-    console.log "content1  ===== \n"
-    $2 = cheerio.load(content1, {decodeEntities: false})
-    # 移除其他属性
-    $2("a, span, img, i, div, code")
-    .removeAttr("class").removeAttr("href")
-    .removeAttr('data-rawwidth').removeAttr('data-rawheight')
-    .removeAttr('data-original').removeAttr('data-hash')
-    .removeAttr('data-editable').removeAttr('data-title')
-    .removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt')
-
-    # 改变IMG
-    changeImg $2, $2("img"), (err, resourceArr) ->
-
-      content2 = $2.html({xmlMode:true})
-      console.log "content2 ======"
-      console.log content2
-      console.log "content2 ======"
-      makeNote noteStore, title, content2,'http://www.zhihu.com/collection/29469118', resourceArr, (err1, note) ->
-        return console.log err1 if err1
-        return console.log note
 
 
-#      callback()
-
-  ,(eachErr) ->
-    return console.log eachErr if eachErr
 
 pageImport = (op, cb) ->
   async.auto
     getPage:(c) ->
       request.get op, (err, res, body) ->
         return c(err) if err
-
+        $ = cheerio.load(body)
         answerList = $("#zh-list-answer-wrap > div")
-        c(null, answerList)
+        c(null, answerList, $)
 
     getContent:['getPage', (c, result) ->
-      answerList = result.getPage
+      answerList = result.getPage[0]
+      $ = result.getPage[1]
+
+      noteArr = []
       oldTitle = ''
       async.eachSeries answerList, (item, callback) ->
+        tmp = {}
         title = $(item).find("h2.zm-item-title").text()
         if not title
           title = oldTitle
         oldTitle = title
+        tmp.title = title
+        sourceUrl = 'http://www.zhihu.com/' + $(item).find("h2.zm-item-title a").attr('href')
         content1 = $(item).find(".content.hidden").text()
         console.log "content1  ====="
         console.log content1
@@ -89,25 +97,38 @@ pageImport = (op, cb) ->
         # 移除其他属性
         rmAttr $2
 
+        changeImg $2, $2("img"), (err, resourceArr) ->
+          return callback(err) if err
+          content2 = $2.html({xmlMode:true})
+          tmp.content = content2
+          tmp.sourceUrl = sourceUrl
+          tmp.resourceArr = resourceArr
+          noteArr.push tmp
+          callback()
 
+      ,(eachErr) ->
+        return cb(eachErr) if eachErr
+        c(null, noteArr)
+    ]
 
+    createNote:['getContent', (c, result) ->
+      noteArr = result.getContent
+      async.eachSeries noteArr, (item, callback) ->
+#        console.log item
+        makeNote noteStore, item.title, item.content, item.sourceUrl,
+        item.resourceArr, (err, note) ->
+          return c(err) if err
+          console.log note
+
+          callback()
+
+      ,(eachErr) ->
+        return cb(eachErr) if eachErr
+        cb()
     ]
 
 
-
-composeCreateNote = ($, imgs, cb) ->
-  cc = async.compose(createNote, changeImg)
-  cc $, imgs, (err, result) ->
-    return cb(err) if err
-
-    cb(null, result)
-
-
-createNote = (title, content, sourceUrl, resourceArr, cb) ->
-
-
-
-
+# 移除不需要属性
 rmAttr = ($) ->
 
   $("a, span, img, i, div, code")
@@ -178,6 +199,12 @@ encodeImg = (img, cb) ->
   cb(null, resource)
 
 
+
+op = reqOp('http://www.zhihu.com/collection/29469118')
+pageImport op, (err, result) ->
+  return console.log err if err
+
+  console.log "hello ok?"
 
 
 

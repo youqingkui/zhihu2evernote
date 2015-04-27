@@ -1,6 +1,6 @@
 Evernote = require('evernote').Evernote
 
-makeNote = (noteStore, noteTitle, noteBody, sourceUrl, resources, parentNotebook, callback) ->
+makeNote = (noteStore, noteTitle, noteBody, sourceUrl, resources, callback) ->
   nBody = '<?xml version="1.0" encoding="UTF-8"?>'
   nBody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
 
@@ -17,8 +17,8 @@ makeNote = (noteStore, noteTitle, noteBody, sourceUrl, resources, parentNotebook
 #  console.log nBody
 
   # parentNotebook is optional; if omitted, default notebook is used
-  if parentNotebook and parentNotebook.guid
-    ourNote.notebookGuid = parentNotebook.guid
+#  if parentNotebook and parentNotebook.guid
+#    ourNote.notebookGuid = parentNotebook.guid
   # Attempt to create note in Evernote account
   noteStore.createNote ourNote, (err, note) ->
     if err
@@ -27,8 +27,10 @@ makeNote = (noteStore, noteTitle, noteBody, sourceUrl, resources, parentNotebook
 # http://dev.evernote.com/documentation/reference/Errors.html#Enum_EDAMErrorCode
       console.log err
       console.log noteTitle
+      callback(err)
     else
-      callback note
+      console.log "i'm ok"
+      callback null, note
 
 
 module.exports = makeNote
