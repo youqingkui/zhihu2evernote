@@ -64,12 +64,13 @@ pageImport = (op, cb) ->
 
         console.log "$2.html({xmlMode:true}),",$2.html({xmlMode:true})
 
-        changeImg $2, $2("img"), (err, resourceArr) ->
+        changeImgs $2, $2("img"), (err, resourceArr) ->
           return callback(err) if err
           content2 = $2.html({xmlMode:true})
           tmp.content = content2
           tmp.sourceUrl = sourceUrl
           tmp.resourceArr = resourceArr
+#          console.log resourceArr
           makeNote noteStore, title, content2, sourceUrl,
           resourceArr, (err2, note) ->
             return callback(err2) if err2
@@ -127,6 +128,57 @@ changeImg = ($, $imgs, cb) ->
   ,(eachErr) ->
     return console.log eachErr if eachErr
     cb(null, resourceArr)
+
+changeImgs = ($, $imgs, cb) ->
+  resourceArr = []
+  async.eachSeries $imgs, (item, callback) ->
+    src = $(item).attr('src')
+
+    readImgRes src, (err, resource) ->
+      return cb(err) if err
+
+      resourceArr.push resource
+      md5 = crypto.createHash('md5')
+      md5.update(resource.image)
+      hexHash = md5.digest('hex')
+      newTag = "<en-media type=#{resource.mime} hash=#{hexHash} />"
+      console.log newTag
+      $(item).replaceWith(newTag)
+
+      callback()
+
+  ,(eachErr) ->
+    return console.log eachErr if eachErr
+    cb(null, resourceArr)
+
+
+readImgRes = (imgUrl, cb) ->
+  op = reqOp(imgUrl)
+  op.encoding = 'binary'
+  async.auto
+    readImg:(callback) ->
+      request.get op, (err, res, body) ->
+        return cb(err) if err
+#        return fs.writeFileSync('test.jpg', body, 'binary')
+        callback(null, body)
+
+    enImg:['readImg', (callback, result) ->
+      image = new Buffer(result.readImg, 'binary')
+      hash = image.toString('base64')
+
+      data = new Evernote.Data()
+      data.size = image.length
+      data.bodyHash = hash
+      data.body = image
+
+      resource = new Evernote.Resource()
+#      resource.mime = mime.lookup(image)
+      resource.mime = 'image/jpeg '
+      res.headers['content-type']
+      resource.data = data
+      resource.image = image
+      cb(null, resource)
+    ]
 
 
 # 获取远程图片
