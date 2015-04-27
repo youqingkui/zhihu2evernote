@@ -63,20 +63,66 @@ request.get op, (err, res, body) ->
   ,(eachErr) ->
     return console.log eachErr if eachErr
 
+pageImport = (op, cb) ->
+  async.auto
+    getPage:(c) ->
+      request.get op, (err, res, body) ->
+        return c(err) if err
+
+        answerList = $("#zh-list-answer-wrap > div")
+        c(null, answerList)
+
+    getContent:['getPage', (c, result) ->
+      answerList = result.getPage
+      oldTitle = ''
+      async.eachSeries answerList, (item, callback) ->
+        title = $(item).find("h2.zm-item-title").text()
+        if not title
+          title = oldTitle
+        oldTitle = title
+        content1 = $(item).find(".content.hidden").text()
+        console.log "content1  ====="
+        console.log content1
+        console.log "content1  ===== \n"
+
+        $2 = cheerio.load(content1, {decodeEntities: false})
+        # 移除其他属性
+        rmAttr $2
+
+
+
+    ]
+
+
+
+composeCreateNote = ($, imgs, cb) ->
+  cc = async.compose(createNote, changeImg)
+  cc $, imgs, (err, result) ->
+    return cb(err) if err
+
+    cb(null, result)
+
+
+createNote = (title, content, sourceUrl, resourceArr, cb) ->
 
 
 
 
+rmAttr = ($) ->
+
+  $("a, span, img, i, div, code")
+  .removeAttr("class").removeAttr("href")
+  .removeAttr('data-rawwidth').removeAttr('data-rawheight')
+  .removeAttr('data-original').removeAttr('data-hash')
+  .removeAttr('data-editable').removeAttr('data-title')
+  .removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt')
 
 
-
+# 替换img为en-media
 changeImg = ($, $imgs, cb) ->
-  console.log "changeImg here +++++"
   resourceArr = []
-#  console.log $
   async.eachSeries $imgs, (item, callback) ->
     src = $(item).attr('src')
-    console.log src
 
     eg = async.compose(encodeImg, getImgRes)
     eg src, (err, resource) ->
@@ -97,16 +143,7 @@ changeImg = ($, $imgs, cb) ->
     cb(null, resourceArr)
 
 
-
-
-
-
-
-
-
-
-
-
+# 获取远程图片
 getImgRes = (imgUrl, cb) ->
   sUrl = imgUrl.split('/')
   imgFile = sUrl[sUrl.length - 1]
@@ -123,7 +160,7 @@ getImgRes = (imgUrl, cb) ->
 
   .pipe(img)
 
-
+# 按evernote编码图片
 encodeImg = (img, cb) ->
   image = fs.readFileSync img
   hash = image.toString('base64')
