@@ -69,6 +69,8 @@
             sourceUrl = $(item).find("h2.zm-item-title a").attr('href');
             if (!sourceUrl) {
               sourceUrl = oldSourceUrl;
+            } else {
+              sourceUrl = 'http://www.zhihu.com' + sourceUrl;
             }
             oldSourceUrl = sourceUrl;
             content1 = $(item).find(".content.hidden").text();
@@ -198,11 +200,12 @@
         if (err) {
           return cb(err);
         }
+        console.log("count", count);
         return cb(null, count);
       });
     },
     importPage: [
-      'getPageCount', function(cb, result) {
+      'getPage', function(cb, result) {
         var pageArr, pageCount, _i, _results;
         pageCount = result.getPageCount;
         pageArr = [0].concat((function() {
@@ -215,14 +218,16 @@
           if (item === !0) {
             newUrl = op.url + '?page' + item;
             op2 = reqOp(newUrl);
-            return pageImport(op2, function(err, result) {
-              if (err) {
-                return cb(err);
-              }
-              console.log("" + newUrl + " is import ok");
-              return callback();
-            });
+          } else {
+            op2 = op;
           }
+          return pageImport(op2, function(err, result) {
+            if (err) {
+              return cb(err);
+            }
+            console.log("" + newUrl + " is import ok");
+            return callback();
+          });
         }, function(eachErr) {
           if (eachErr) {
             return console.log(eachErr);

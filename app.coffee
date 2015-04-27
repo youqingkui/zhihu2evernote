@@ -48,6 +48,8 @@ pageImport = (op, cb) ->
         sourceUrl = $(item).find("h2.zm-item-title a").attr('href')
         if not sourceUrl
           sourceUrl = oldSourceUrl
+        else
+          sourceUrl = 'http://www.zhihu.com' + sourceUrl
         oldSourceUrl = sourceUrl
         content1 = $(item).find(".content.hidden").text()
         console.log "content1  ====="
@@ -78,26 +80,6 @@ pageImport = (op, cb) ->
       return cb(eachErr) if eachErr
 
       cb()
-
-
-
-
-#    createNote:['getContent', (c, result) ->
-#      noteArr = result.getContent
-#      async.eachSeries noteArr, (item, callback) ->
-##        console.log item
-#        makeNote noteStore, item.title, item.content, item.sourceUrl,
-#        item.resourceArr, (err, note) ->
-#          return c(err) if err
-#          console.log note
-#
-#          callback()
-#
-#      ,(eachErr) ->
-#        return cb(eachErr) if eachErr
-#        cb()
-#    ]
-
 
 
 # 移除不需要属性
@@ -187,23 +169,26 @@ async.auto
   getPage:(cb) ->
     getPageCount op, (err, count) ->
       return cb(err) if err
-
+      console.log "count", count
       cb(null, count)
 
-  importPage:['getPageCount', (cb, result) ->
+  importPage:['getPage', (cb, result) ->
     pageCount = result.getPageCount
     pageArr = [0].concat([2..pageCount])
     async.eachSeries pageArr, (item, callback) ->
       if item is not 0
         newUrl = op.url + '?page' + item
-
         op2 = reqOp(newUrl)
-        pageImport op2, (err, result) ->
-          return cb(err) if err
 
-          console.log "#{newUrl} is import ok"
+      else
+        op2 = op
 
-          callback()
+      pageImport op2, (err, result) ->
+        return cb(err) if err
+
+        console.log "#{newUrl} is import ok"
+
+        callback()
 
     ,(eachErr) ->
       return console.log eachErr if eachErr
