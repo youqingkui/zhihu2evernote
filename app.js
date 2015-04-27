@@ -49,11 +49,12 @@
       },
       getContent: [
         'getPage', function(c, result) {
-          var $, answerList, noteArr, oldTitle;
+          var $, answerList, noteArr, oldSourceUrl, oldTitle;
           answerList = result.getPage[0];
           $ = result.getPage[1];
           noteArr = [];
           oldTitle = '';
+          oldSourceUrl = '';
           return async.eachSeries(answerList, function(item, callback) {
             var $2, content1, sourceUrl, title, tmp;
             tmp = {};
@@ -63,7 +64,11 @@
             }
             oldTitle = title;
             tmp.title = title;
-            sourceUrl = 'http://www.zhihu.com/' + $(item).find("h2.zm-item-title a").attr('href');
+            sourceUrl = $(item).find("h2.zm-item-title a").attr('href');
+            if (!sourceUrl) {
+              sourceUrl = oldSourceUrl;
+            }
+            oldSourceUrl = sourceUrl;
             content1 = $(item).find(".content.hidden").text();
             console.log("content1  =====");
             console.log(content1);
@@ -83,34 +88,19 @@
               tmp.content = content2;
               tmp.sourceUrl = sourceUrl;
               tmp.resourceArr = resourceArr;
-              noteArr.push(tmp);
-              return callback();
+              return makeNote(noteStore, title, content2, sourceUrl, resourceArr, function(err2, note) {
+                if (err2) {
+                  return callback(err2);
+                }
+                console.log("create ok " + note.title);
+                return callback();
+              });
             });
           }, function(eachErr) {
             if (eachErr) {
               return cb(eachErr);
             }
             return c(null, noteArr);
-          });
-        }
-      ],
-      createNote: [
-        'getContent', function(c, result) {
-          var noteArr;
-          noteArr = result.getContent;
-          return async.eachSeries(noteArr, function(item, callback) {
-            return makeNote(noteStore, item.title, item.content, item.sourceUrl, item.resourceArr, function(err, note) {
-              if (err) {
-                return c(err);
-              }
-              console.log(note);
-              return callback();
-            });
-          }, function(eachErr) {
-            if (eachErr) {
-              return cb(eachErr);
-            }
-            return cb();
           });
         }
       ]

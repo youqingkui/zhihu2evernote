@@ -80,6 +80,7 @@ pageImport = (op, cb) ->
 
       noteArr = []
       oldTitle = ''
+      oldSourceUrl = ''
       async.eachSeries answerList, (item, callback) ->
         tmp = {}
         title = $(item).find("h2.zm-item-title").text()
@@ -87,7 +88,10 @@ pageImport = (op, cb) ->
           title = oldTitle
         oldTitle = title
         tmp.title = title
-        sourceUrl = 'http://www.zhihu.com/' + $(item).find("h2.zm-item-title a").attr('href')
+        sourceUrl = $(item).find("h2.zm-item-title a").attr('href')
+        if not sourceUrl
+          sourceUrl = oldSourceUrl
+        oldSourceUrl = sourceUrl
         content1 = $(item).find(".content.hidden").text()
         console.log "content1  ====="
         console.log content1
@@ -103,29 +107,32 @@ pageImport = (op, cb) ->
           tmp.content = content2
           tmp.sourceUrl = sourceUrl
           tmp.resourceArr = resourceArr
-          noteArr.push tmp
-          callback()
+          makeNote noteStore, title, content2, sourceUrl,
+          resourceArr, (err2, note) ->
+            return callback(err2) if err2
+            console.log "create ok #{note.title}"
+            callback()
 
       ,(eachErr) ->
         return cb(eachErr) if eachErr
         c(null, noteArr)
     ]
 
-    createNote:['getContent', (c, result) ->
-      noteArr = result.getContent
-      async.eachSeries noteArr, (item, callback) ->
-#        console.log item
-        makeNote noteStore, item.title, item.content, item.sourceUrl,
-        item.resourceArr, (err, note) ->
-          return c(err) if err
-          console.log note
-
-          callback()
-
-      ,(eachErr) ->
-        return cb(eachErr) if eachErr
-        cb()
-    ]
+#    createNote:['getContent', (c, result) ->
+#      noteArr = result.getContent
+#      async.eachSeries noteArr, (item, callback) ->
+##        console.log item
+#        makeNote noteStore, item.title, item.content, item.sourceUrl,
+#        item.resourceArr, (err, note) ->
+#          return c(err) if err
+#          console.log note
+#
+#          callback()
+#
+#      ,(eachErr) ->
+#        return cb(eachErr) if eachErr
+#        cb()
+#    ]
 
 
 # 移除不需要属性
