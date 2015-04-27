@@ -13,7 +13,7 @@ nodeUrl = require('url')
 reqOp = (url) ->
   options =
     url:url
-    timeout:10000
+#    timeout:5000
     headers:
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36',
       'Cookie':cookie
@@ -27,6 +27,7 @@ pageImport = (op, cb) ->
   async.auto
     getPage:(c) ->
       request.get op, (err, res, body) ->
+        console.log err
         return c(err) if err
         $ = cheerio.load(body)
         answerList = $("#zh-list-answer-wrap > div")
@@ -63,23 +64,35 @@ pageImport = (op, cb) ->
 
         console.log "$2.html({xmlMode:true}),",$2.html({xmlMode:true})
 
-        changeImg $2, $2("img"), (err, resourceArr) ->
-          return callback(err) if err
+        if true
           content2 = $2.html({xmlMode:true})
           tmp.content = content2
           tmp.sourceUrl = sourceUrl
-          tmp.resourceArr = resourceArr
+          tmp.resourceArr = []
           makeNote noteStore, title, content2, sourceUrl,
-          resourceArr, (err2, note) ->
+          tmp.resourceArr, (err2, note) ->
             return callback(err2) if err2
             console.log "create ok #{note.title}"
             callback()
+        else
+            changeImg $2, $2("img"), (err, resourceArr) ->
+            return callback(err) if err
+            content2 = $2.html({xmlMode:true})
+            tmp.content = content2
+            tmp.sourceUrl = sourceUrl
+            tmp.resourceArr = resourceArr
+            makeNote noteStore, title, content2, sourceUrl,
+            resourceArr, (err2, note) ->
+              return callback(err2) if err2
+              console.log "create ok #{note.title}"
+              callback()
 
       ,(eachErr) ->
         return cb(eachErr) if eachErr
         c(null, noteArr)
     ]
   ,(eachErr) ->
+      console.log eachErr
       return cb(eachErr) if eachErr
 
       cb()

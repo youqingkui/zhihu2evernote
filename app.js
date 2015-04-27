@@ -28,7 +28,6 @@
     var options;
     options = {
       url: url,
-      timeout: 10000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36',
         'Cookie': cookie
@@ -42,6 +41,7 @@
       getPage: function(c) {
         return request.get(op, function(err, res, body) {
           var $, answerList;
+          console.log(err);
           if (err) {
             return c(err);
           }
@@ -59,7 +59,7 @@
           oldTitle = '';
           oldSourceUrl = '';
           return async.eachSeries(answerList, function(item, callback) {
-            var $2, content1, sourceUrl, title, tmp;
+            var $2, content1, content2, sourceUrl, title, tmp;
             tmp = {};
             title = $(item).find("h2.zm-item-title").text();
             if (!title) {
@@ -82,8 +82,22 @@
             console.log("$2.html({xmlMode:true}),", $2.html({
               xmlMode: true
             }));
-            return changeImg($2, $2("img"), function(err, resourceArr) {
-              var content2;
+            if (true) {
+              content2 = $2.html({
+                xmlMode: true
+              });
+              tmp.content = content2;
+              tmp.sourceUrl = sourceUrl;
+              tmp.resourceArr = [];
+              return makeNote(noteStore, title, content2, sourceUrl, tmp.resourceArr, function(err2, note) {
+                if (err2) {
+                  return callback(err2);
+                }
+                console.log("create ok " + note.title);
+                return callback();
+              });
+            } else {
+              changeImg($2, $2("img"), function(err, resourceArr) {});
               if (err) {
                 return callback(err);
               }
@@ -100,7 +114,7 @@
                 console.log("create ok " + note.title);
                 return callback();
               });
-            });
+            }
           }, function(eachErr) {
             if (eachErr) {
               return cb(eachErr);
@@ -110,6 +124,7 @@
         }
       ]
     }, function(eachErr) {
+      console.log(eachErr);
       if (eachErr) {
         return cb(eachErr);
       }
