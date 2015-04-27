@@ -8,6 +8,7 @@ Evernote = require('evernote').Evernote
 fs = require('fs')
 crypto = require('crypto')
 mime = require('mime')
+nodeUrl = require('url')
 
 reqOp = (url) ->
   options =
@@ -17,50 +18,6 @@ reqOp = (url) ->
       'Cookie':cookie
 
   return options
-
-
-#request.get op, (err, res, body) ->
-#  return console.log err if err
-#
-#  $ = cheerio.load(body, {})
-#
-#  answerList = $("#zh-list-answer-wrap > div")
-#  oldTitle = ''
-#  async.eachSeries answerList, (item, callback) ->
-#
-#    title = $(item).find("h2.zm-item-title").text()
-#    if not title
-#      title = oldTitle
-#    oldTitle = title
-#    content1 = $(item).find(".content.hidden").text()
-#    console.log "content1  ====="
-#    console.log content1
-#    console.log "content1  ===== \n"
-#    $2 = cheerio.load(content1, {decodeEntities: false})
-#    # 移除其他属性
-#    $2("a, span, img, i, div, code")
-#    .removeAttr("class").removeAttr("href")
-#    .removeAttr('data-rawwidth').removeAttr('data-rawheight')
-#    .removeAttr('data-original').removeAttr('data-hash')
-#    .removeAttr('data-editable').removeAttr('data-title')
-#    .removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt')
-#
-#    # 改变IMG
-#    changeImg $2, $2("img"), (err, resourceArr) ->
-#
-#      content2 = $2.html({xmlMode:true})
-#      console.log "content2 ======"
-#      console.log content2
-#      console.log "content2 ======"
-#      makeNote noteStore, title, content2,'http://www.zhihu.com/collection/29469118', resourceArr, (err1, note) ->
-#        return console.log err1 if err1
-#        return console.log note
-#
-#
-##      callback()
-#
-#  ,(eachErr) ->
-#    return console.log eachErr if eachErr
 
 
 
@@ -117,6 +74,13 @@ pageImport = (op, cb) ->
         return cb(eachErr) if eachErr
         c(null, noteArr)
     ]
+  ,(eachErr) ->
+      return cb(eachErr) if eachErr
+
+      cb()
+
+
+
 
 #    createNote:['getContent', (c, result) ->
 #      noteArr = result.getContent
@@ -133,6 +97,7 @@ pageImport = (op, cb) ->
 #        return cb(eachErr) if eachErr
 #        cb()
 #    ]
+
 
 
 # 移除不需要属性
@@ -206,12 +171,47 @@ encodeImg = (img, cb) ->
   cb(null, resource)
 
 
+getPageCount = (url, cb) ->
+  request.get url, (err, res, body) ->
+    return cb(err) if err
+
+    $ = cheerio.load body
+    spanArr = $(".zm-invite-pager span")
+    pageCount = $(spanArr[spanArr.length - 2]).text()
+
+    cb(null, Number(pageCount))
 
 op = reqOp('http://www.zhihu.com/collection/29469118')
-pageImport op, (err, result) ->
-  return console.log err if err
 
-  console.log "hello ok?"
+async.auto
+  getPage:(cb) ->
+    getPageCount op, (err, count) ->
+      return cb(err) if err
+
+      cb(null, count)
+
+  importPage:['getPageCount', (cb, result) ->
+    pageCount = result.getPageCount
+    pageArr = [0].concat([2..pageCount])
+    async.eachSeries pageArr, (item, callback) ->
+      if item is not 0
+        newUrl = op.url + '?page' + item
+
+        op2 = reqOp(newUrl)
+        pageImport op2, (err, result) ->
+          return cb(err) if err
+
+          console.log "#{newUrl} is import ok"
+
+          callback()
+
+    ,(eachErr) ->
+      return console.log eachErr if eachErr
+
+      console.log "all page do !!"
+
+  ]
+
 
 
 
