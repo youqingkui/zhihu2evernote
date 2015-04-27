@@ -59,7 +59,7 @@
           oldTitle = '';
           oldSourceUrl = '';
           return async.eachSeries(answerList, function(item, callback) {
-            var $2, content1, content2, sourceUrl, title, tmp;
+            var $2, content1, sourceUrl, title, tmp;
             tmp = {};
             title = $(item).find("h2.zm-item-title").text();
             if (!title) {
@@ -82,22 +82,8 @@
             console.log("$2.html({xmlMode:true}),", $2.html({
               xmlMode: true
             }));
-            if (true) {
-              content2 = $2.html({
-                xmlMode: true
-              });
-              tmp.content = content2;
-              tmp.sourceUrl = sourceUrl;
-              tmp.resourceArr = [];
-              return makeNote(noteStore, title, content2, sourceUrl, tmp.resourceArr, function(err2, note) {
-                if (err2) {
-                  return callback(err2);
-                }
-                console.log("create ok " + note.title);
-                return callback();
-              });
-            } else {
-              changeImg($2, $2("img"), function(err, resourceArr) {});
+            return changeImg($2, $2("img"), function(err, resourceArr) {
+              var content2;
               if (err) {
                 return callback(err);
               }
@@ -114,7 +100,7 @@
                 console.log("create ok " + note.title);
                 return callback();
               });
-            }
+            });
           }, function(eachErr) {
             if (eachErr) {
               return cb(eachErr);

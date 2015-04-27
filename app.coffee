@@ -64,28 +64,17 @@ pageImport = (op, cb) ->
 
         console.log "$2.html({xmlMode:true}),",$2.html({xmlMode:true})
 
-        if true
+        changeImg $2, $2("img"), (err, resourceArr) ->
+          return callback(err) if err
           content2 = $2.html({xmlMode:true})
           tmp.content = content2
           tmp.sourceUrl = sourceUrl
-          tmp.resourceArr = []
+          tmp.resourceArr = resourceArr
           makeNote noteStore, title, content2, sourceUrl,
-          tmp.resourceArr, (err2, note) ->
+          resourceArr, (err2, note) ->
             return callback(err2) if err2
             console.log "create ok #{note.title}"
             callback()
-        else
-            changeImg $2, $2("img"), (err, resourceArr) ->
-            return callback(err) if err
-            content2 = $2.html({xmlMode:true})
-            tmp.content = content2
-            tmp.sourceUrl = sourceUrl
-            tmp.resourceArr = resourceArr
-            makeNote noteStore, title, content2, sourceUrl,
-            resourceArr, (err2, note) ->
-              return callback(err2) if err2
-              console.log "create ok #{note.title}"
-              callback()
 
       ,(eachErr) ->
         return cb(eachErr) if eachErr
