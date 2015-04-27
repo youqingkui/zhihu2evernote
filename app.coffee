@@ -60,6 +60,8 @@ pageImport = (op, cb) ->
         # 移除其他属性
         rmAttr $2
 
+        console.log "$2.html({xmlMode:true}),",$2.html({xmlMode:true})
+
         changeImg $2, $2("img"), (err, resourceArr) ->
           return callback(err) if err
           content2 = $2.html({xmlMode:true})
@@ -86,11 +88,17 @@ pageImport = (op, cb) ->
 rmAttr = ($) ->
 
   $("a, span, img, i, div, code")
-  .removeAttr("class").removeAttr("href")
-  .removeAttr('data-rawwidth').removeAttr('data-rawheight')
-  .removeAttr('data-original').removeAttr('data-hash')
-  .removeAttr('data-editable').removeAttr('data-title')
-  .removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt')
+  .map (i, elem) ->
+    for k of elem.attribs
+      console.log k
+      if k != 'src'
+        $(this).removeAttr(k)
+
+#  .removeAttr('data-rawwidth').removeAttr('data-rawheight')
+#  .removeAttr('data-original').removeAttr('data-hash')
+#  .removeAttr('data-editable').removeAttr('data-title')
+#  .removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt')
+#  .removeAttr('data-swfurl')
 
 
 # 替换img为en-media

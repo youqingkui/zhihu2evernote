@@ -78,6 +78,9 @@
               decodeEntities: false
             });
             rmAttr($2);
+            console.log("$2.html({xmlMode:true}),", $2.html({
+              xmlMode: true
+            }));
             return changeImg($2, $2("img"), function(err, resourceArr) {
               var content2;
               if (err) {
@@ -114,7 +117,19 @@
   };
 
   rmAttr = function($) {
-    return $("a, span, img, i, div, code").removeAttr("class").removeAttr("href").removeAttr('data-rawwidth').removeAttr('data-rawheight').removeAttr('data-original').removeAttr('data-hash').removeAttr('data-editable').removeAttr('data-title').removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt');
+    return $("a, span, img, i, div, code").map(function(i, elem) {
+      var k, _results;
+      _results = [];
+      for (k in elem.attribs) {
+        console.log(k);
+        if (k !== 'src') {
+          _results.push($(this).removeAttr(k));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    });
   };
 
   changeImg = function($, $imgs, cb) {
