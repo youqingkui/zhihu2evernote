@@ -13,6 +13,7 @@ nodeUrl = require('url')
 reqOp = (url) ->
   options =
     url:url
+    timeout:10000
     headers:
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36',
       'Cookie':cookie
