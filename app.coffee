@@ -178,7 +178,7 @@ async.auto
     console.log "pageArr ==>", pageArr
     async.eachSeries pageArr, (item, callback) ->
       unless item is 0
-        newUrl = op.url + '?page' + item
+        newUrl = op.url + '?page=' + item
         op2 = reqOp(newUrl)
 
       else

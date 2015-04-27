@@ -214,7 +214,7 @@
         return async.eachSeries(pageArr, function(item, callback) {
           var newUrl, op2;
           if (item !== 0) {
-            newUrl = op.url + '?page' + item;
+            newUrl = op.url + '?page=' + item;
             op2 = reqOp(newUrl);
           } else {
             op2 = op;
