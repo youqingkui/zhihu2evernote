@@ -204,7 +204,7 @@
     importPage: [
       'getPage', function(cb, result) {
         var pageArr, pageCount, _i, _results;
-        pageCount = result.getPageCount;
+        pageCount = result.getPage;
         pageArr = [0].concat((function() {
           _results = [];
           for (var _i = 2; 2 <= pageCount ? _i <= pageCount : _i >= pageCount; 2 <= pageCount ? _i++ : _i--){ _results.push(_i); }

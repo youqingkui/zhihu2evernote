@@ -173,7 +173,7 @@ async.auto
       cb(null, count)
 
   importPage:['getPage', (cb, result) ->
-    pageCount = result.getPageCount
+    pageCount = result.getPage
     pageArr = [0].concat([2..pageCount])
     console.log "pageArr ==>", pageArr
     async.eachSeries pageArr, (item, callback) ->
