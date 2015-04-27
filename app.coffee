@@ -52,9 +52,9 @@ pageImport = (op, cb) ->
           sourceUrl = 'http://www.zhihu.com' + sourceUrl
         oldSourceUrl = sourceUrl
         content1 = $(item).find(".content.hidden").text()
-        console.log "content1  ====="
-        console.log content1
-        console.log "content1  ===== \n"
+#        console.log "content1  ====="
+#        console.log content1
+#        console.log "content1  ===== \n"
 
         $2 = cheerio.load(content1, {decodeEntities: false})
         # 移除其他属性
@@ -175,18 +175,19 @@ async.auto
   importPage:['getPage', (cb, result) ->
     pageCount = result.getPageCount
     pageArr = [0].concat([2..pageCount])
+    console.log "pageArr ==>", pageArr
     async.eachSeries pageArr, (item, callback) ->
-      if item is not 0
+      unless item is 0
         newUrl = op.url + '?page' + item
         op2 = reqOp(newUrl)
 
       else
         op2 = op
-
+      console.log "op2 ==>", op2
       pageImport op2, (err, result) ->
         return cb(err) if err
 
-        console.log "#{newUrl} is import ok"
+        console.log "#{op2.url} is import ok"
 
         callback()
 

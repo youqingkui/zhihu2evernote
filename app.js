@@ -74,9 +74,6 @@
             }
             oldSourceUrl = sourceUrl;
             content1 = $(item).find(".content.hidden").text();
-            console.log("content1  =====");
-            console.log(content1);
-            console.log("content1  ===== \n");
             $2 = cheerio.load(content1, {
               decodeEntities: false
             });
@@ -213,19 +210,21 @@
           for (var _i = 2; 2 <= pageCount ? _i <= pageCount : _i >= pageCount; 2 <= pageCount ? _i++ : _i--){ _results.push(_i); }
           return _results;
         }).apply(this));
+        console.log("pageArr ==>", pageArr);
         return async.eachSeries(pageArr, function(item, callback) {
           var newUrl, op2;
-          if (item === !0) {
+          if (item !== 0) {
             newUrl = op.url + '?page' + item;
             op2 = reqOp(newUrl);
           } else {
             op2 = op;
           }
+          console.log("op2 ==>", op2);
           return pageImport(op2, function(err, result) {
             if (err) {
               return cb(err);
             }
-            console.log("" + newUrl + " is import ok");
+            console.log("" + op2.url + " is import ok");
             return callback();
           });
         }, function(eachErr) {
