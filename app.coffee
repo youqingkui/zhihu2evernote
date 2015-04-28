@@ -41,12 +41,10 @@ pageImport = (op, cb) ->
       oldTitle = ''
       oldSourceUrl = ''
       async.eachSeries answerList, (item, callback) ->
-        tmp = {}
         title = $(item).find("h2.zm-item-title").text()
         if not title
           title = oldTitle
         oldTitle = title
-        tmp.title = title
         sourceUrl = $(item).find("h2.zm-item-title a").attr('href')
         if not sourceUrl
           sourceUrl = oldSourceUrl
@@ -54,28 +52,19 @@ pageImport = (op, cb) ->
           sourceUrl = 'http://www.zhihu.com' + sourceUrl
         oldSourceUrl = sourceUrl
         content1 = $(item).find(".content.hidden").text()
-#        console.log "content1  ====="
-#        console.log content1
-#        console.log "content1  ===== \n"
+        tagUrl = $(item).find("a.toggle-expand").attr('href')
+        tagUrl = 'http://www.zhihu.com' + tagUrl
 
         $2 = cheerio.load(content1, {decodeEntities: false})
         # 移除其他属性
         rmAttr $2
-
         console.log "$2.html({xmlMode:true}),",$2.html({xmlMode:true})
 
-        changeImgs $2, $2("img"), (err, resourceArr) ->
+        composeCreateNote $2, title, tagUrl, sourceUrl, noteStore, (err, note) ->
           return callback(err) if err
-          content2 = $2.html({xmlMode:true})
-          tmp.content = content2
-          tmp.sourceUrl = sourceUrl
-          tmp.resourceArr = resourceArr
-#          console.log resourceArr
-          makeNote noteStore, title, content2, sourceUrl,
-          resourceArr, (err2, note) ->
-            return callback(err2) if err2
-            console.log "create ok #{note.title}"
-            callback()
+
+          callback()
+
 
       ,(eachErr) ->
         return cb(eachErr) if eachErr
@@ -87,6 +76,52 @@ pageImport = (op, cb) ->
 
       cb()
 
+composeCreateNote = ($, title, tagUrl, sourceUrl, noteStore, cb) ->
+  async.parallel [
+    (callback) ->
+      getTag tagUrl, (tagList) ->
+        callback(null, tagList)
+
+    (callback) ->
+      changeImgs $, $("img"), (err, resourceArr) ->
+        return callback(err) if err
+        content = $.html({xmlMode:true})
+        callback(null, content, resourceArr)
+
+  ],(endErr, result) ->
+    return cb(endErr) if endErr
+    tagList = result[0]
+    content = result[1][0]
+    resourceArr = result[1][1]
+
+    makeNote noteStore, title, tagList, content, sourceUrl, resourceArr, (err, note) ->
+      return cb(err) if err
+      console.log "create ok #{note.title}"
+      cb()
+
+
+
+
+# 获取标签
+getTag = (url, cb) ->
+  op = reqOp(url)
+  op.timeout = 5000
+  request.get op, (err, res, body) ->
+    if err
+      console.log err
+      return cb(null, [])
+
+    $ = cheerio.load(body)
+    tagArr = $("a.zm-item-tag")
+    tagList = []
+    tagArr.each (i, elem) ->
+      tagName = $(elem).text()
+      tagList.push tagName
+
+    cb(null, tagList)
+
+
+
 
 # 移除不需要属性
 rmAttr = ($) ->
@@ -94,16 +129,8 @@ rmAttr = ($) ->
   $("a, span, img, i, div, code")
   .map (i, elem) ->
     for k of elem.attribs
-#      console.log k
       if k != 'src'
         $(this).removeAttr(k)
-
-#  .removeAttr('data-rawwidth').removeAttr('data-rawheight')
-#  .removeAttr('data-original').removeAttr('data-hash')
-#  .removeAttr('data-editable').removeAttr('data-title')
-#  .removeAttr('data-tip').removeAttr("eeimg").removeAttr('alt')
-#  .removeAttr('data-swfurl')
-
 
 
 
