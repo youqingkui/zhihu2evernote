@@ -106,7 +106,7 @@ composeCreateNote = ($, title, tagUrl, sourceUrl, noteStore, cb) ->
 # 获取标签
 getTag = (url, cb) ->
   op = reqOp(url)
-  op.timeout = 5000
+  console.log "tag url ==>", op
   request.get op, (err, res, body) ->
     if err
       console.log err

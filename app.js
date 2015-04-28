@@ -141,7 +141,7 @@
   getTag = function(url, cb) {
     var op;
     op = reqOp(url);
-    op.timeout = 5000;
+    console.log("tag url ==>", op);
     return request.get(op, function(err, res, body) {
       var $, tagArr, tagList;
       if (err) {
