@@ -14,6 +14,7 @@ makeNote = (noteStore, noteTitle, noteBody, sourceUrl, resources, callback) ->
   ourNote.content = nBody
   ourNote.attributes = attr
   ourNote.resources = resources
+#  ourNote.tagNames = ['zhihu123']
 #  console.log nBody
 
   # parentNotebook is optional; if omitted, default notebook is used

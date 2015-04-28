@@ -9,6 +9,7 @@ fs = require('fs')
 crypto = require('crypto')
 mime = require('mime')
 nodeUrl = require('url')
+querystring = require('querystring')
 
 reqOp = (url) ->
   options =
@@ -93,7 +94,7 @@ rmAttr = ($) ->
   $("a, span, img, i, div, code")
   .map (i, elem) ->
     for k of elem.attribs
-      console.log k
+#      console.log k
       if k != 'src'
         $(this).removeAttr(k)
 
@@ -104,30 +105,9 @@ rmAttr = ($) ->
 #  .removeAttr('data-swfurl')
 
 
+
+
 # 替换img为en-media
-changeImg = ($, $imgs, cb) ->
-  resourceArr = []
-  async.eachSeries $imgs, (item, callback) ->
-    src = $(item).attr('src')
-
-    eg = async.compose(encodeImg, getImgRes)
-    eg src, (err, resource) ->
-      return console.log err if err
-      resourceArr.push resource
-
-      md5 = crypto.createHash('md5')
-      md5.update(resource.image)
-      hexHash = md5.digest('hex')
-      newTag = "<en-media type=#{resource.mime} hash=#{hexHash} />"
-      console.log newTag
-      $(item).replaceWith(newTag)
-
-      callback()
-
-  ,(eachErr) ->
-    return console.log eachErr if eachErr
-    cb(null, resourceArr)
-
 changeImgs = ($, $imgs, cb) ->
   resourceArr = []
   async.eachSeries $imgs, (item, callback) ->
@@ -151,6 +131,7 @@ changeImgs = ($, $imgs, cb) ->
     cb(null, resourceArr)
 
 
+# 读取编码远程图片
 readImgRes = (imgUrl, cb) ->
   op = reqOp(imgUrl)
   op.encoding = 'binary'
@@ -180,41 +161,6 @@ readImgRes = (imgUrl, cb) ->
     ]
 
 
-# 获取远程图片
-getImgRes = (imgUrl, cb) ->
-  sUrl = imgUrl.split('/')
-  imgFile = sUrl[sUrl.length - 1]
-  img = fs.createWriteStream imgFile
-  request
-    .get imgUrl
-    .on 'response', (res) ->
-      console.log res.statusCode
-    .on 'error', (err) ->
-      console.log err
-    .on 'end', () ->
-      console.log "#{imgUrl} down ok"
-      cb(null, imgFile)
-
-  .pipe(img)
-
-# 按evernote编码图片
-encodeImg = (img, cb) ->
-  image = fs.readFileSync img
-  hash = image.toString('base64')
-
-  data = new Evernote.Data()
-  data.size = image.length
-  data.bodyHash = hash
-  data.body = image
-
-  resource = new Evernote.Resource()
-  resource.mime = mime.lookup(img)
-  resource.data = data
-  resource.image = image
-
-  cb(null, resource)
-
-
 getPageCount = (url, cb) ->
   request.get url, (err, res, body) ->
     return cb(err) if err
@@ -225,7 +171,7 @@ getPageCount = (url, cb) ->
 
     cb(null, Number(pageCount))
 
-op = reqOp('http://www.zhihu.com/collection/29469118')
+op = reqOp('http://www.zhihu.com/collection/29469118?page=9')
 
 async.auto
   getPage:(cb) ->
@@ -236,11 +182,18 @@ async.auto
 
   importPage:['getPage', (cb, result) ->
     pageCount = result.getPage
-    pageArr = [0].concat([2..pageCount])
+    parseUrl = nodeUrl.parse(op.url)
+    query = querystring.parse(parseUrl.query)
+    stratPage = Number(query.page)
+    if stratPage
+      pageArr = [stratPage..pageCount]
+    else
+      pageArr = [0].concat([2..pageCount])
+
     console.log "pageArr ==>", pageArr
     async.eachSeries pageArr, (item, callback) ->
       unless item is 0
-        newUrl = op.url + '?page=' + item
+        newUrl = parseUrl.protocol + '//' + parseUrl.hostname + parseUrl.pathname + '?page=' + item
         op2 = reqOp(newUrl)
 
       else
