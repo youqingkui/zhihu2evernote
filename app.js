@@ -54,26 +54,18 @@
       },
       getContent: [
         'getPage', function(c, result) {
-          var $, answerList, noteArr, oldSourceUrl, oldTitle;
+          var $, answerList, noteArr, oldTitle;
           answerList = result.getPage[0];
           $ = result.getPage[1];
           noteArr = [];
           oldTitle = '';
-          oldSourceUrl = '';
           return async.eachSeries(answerList, function(item, callback) {
-            var $2, content1, sourceUrl, tagUrl, title;
+            var $2, content1, tagUrl, title;
             title = $(item).find("h2.zm-item-title").text();
             if (!title) {
               title = oldTitle;
             }
             oldTitle = title;
-            sourceUrl = $(item).find("h2.zm-item-title a").attr('href');
-            if (!sourceUrl) {
-              sourceUrl = oldSourceUrl;
-            } else {
-              sourceUrl = 'http://www.zhihu.com' + sourceUrl;
-            }
-            oldSourceUrl = sourceUrl;
             content1 = $(item).find(".content.hidden").text();
             tagUrl = $(item).find("a.toggle-expand").attr('href');
             tagUrl = 'http://www.zhihu.com' + tagUrl;
@@ -84,7 +76,7 @@
             console.log("$2.html({xmlMode:true}),", $2.html({
               xmlMode: true
             }));
-            return composeCreateNote($2, title, tagUrl, sourceUrl, noteStore, function(err, note) {
+            return composeCreateNote($2, title, tagUrl, tagUrl, noteStore, function(err, note) {
               if (err) {
                 return callback(err);
               }
@@ -260,7 +252,7 @@
     });
   };
 
-  op = reqOp('http://www.zhihu.com/collection/29469118');
+  op = reqOp('http://www.zhihu.com/collection/19932288');
 
   async.auto({
     getPage: function(cb) {

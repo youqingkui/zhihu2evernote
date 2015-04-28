@@ -39,18 +39,18 @@ pageImport = (op, cb) ->
 
       noteArr = []
       oldTitle = ''
-      oldSourceUrl = ''
+#      oldSourceUrl = ''
       async.eachSeries answerList, (item, callback) ->
         title = $(item).find("h2.zm-item-title").text()
         if not title
           title = oldTitle
         oldTitle = title
-        sourceUrl = $(item).find("h2.zm-item-title a").attr('href')
-        if not sourceUrl
-          sourceUrl = oldSourceUrl
-        else
-          sourceUrl = 'http://www.zhihu.com' + sourceUrl
-        oldSourceUrl = sourceUrl
+#        sourceUrl = $(item).find("h2.zm-item-title a").attr('href')
+#        if not sourceUrl
+#          sourceUrl = oldSourceUrl
+#        else
+#          sourceUrl = 'http://www.zhihu.com' + sourceUrl
+#        oldSourceUrl = sourceUrl
         content1 = $(item).find(".content.hidden").text()
         tagUrl = $(item).find("a.toggle-expand").attr('href')
         tagUrl = 'http://www.zhihu.com' + tagUrl
@@ -60,7 +60,7 @@ pageImport = (op, cb) ->
         rmAttr $2
         console.log "$2.html({xmlMode:true}),",$2.html({xmlMode:true})
 
-        composeCreateNote $2, title, tagUrl, sourceUrl, noteStore, (err, note) ->
+        composeCreateNote $2, title, tagUrl, tagUrl, noteStore, (err, note) ->
           return callback(err) if err
 
           callback()
@@ -199,7 +199,8 @@ getPageCount = (url, cb) ->
 
     cb(null, Number(pageCount))
 
-op = reqOp('http://www.zhihu.com/collection/29469118')
+#op = reqOp('http://www.zhihu.com/collection/29469118')
+op = reqOp('http://www.zhihu.com/collection/19932288')
 
 async.auto
   getPage:(cb) ->
