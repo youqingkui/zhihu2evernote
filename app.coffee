@@ -90,6 +90,9 @@ composeCreateNote = ($, title, tagUrl, sourceUrl, noteStore, cb) ->
 
   ],(endErr, result) ->
     return cb(endErr) if endErr
+    console.log "++++++++++++++++++++++++"
+    console.log result
+    console.log "++++++++++++++++++++++++"
     tagList = result[0]
     content = result[1][0]
     resourceArr = result[1][1]
@@ -98,8 +101,6 @@ composeCreateNote = ($, title, tagUrl, sourceUrl, noteStore, cb) ->
       return cb(err) if err
       console.log "create ok #{note.title}"
       cb()
-
-
 
 
 # 获取标签
@@ -115,10 +116,10 @@ getTag = (url, cb) ->
     tagArr = $("a.zm-item-tag")
     tagList = []
     tagArr.each (i, elem) ->
-      tagName = $(elem).text()
+      tagName = $(elem).text().trim()
       tagList.push tagName
-
-    cb(null, tagList)
+    console.log "tagListtagListtagListtagListtagList ====>",tagList
+    cb(tagList)
 
 
 

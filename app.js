@@ -130,6 +130,9 @@
       if (endErr) {
         return cb(endErr);
       }
+      console.log("++++++++++++++++++++++++");
+      console.log(result);
+      console.log("++++++++++++++++++++++++");
       tagList = result[0];
       content = result[1][0];
       resourceArr = result[1][1];
@@ -158,10 +161,11 @@
       tagList = [];
       tagArr.each(function(i, elem) {
         var tagName;
-        tagName = $(elem).text();
+        tagName = $(elem).text().trim();
         return tagList.push(tagName);
       });
-      return cb(null, tagList);
+      console.log("tagListtagListtagListtagListtagList ====>", tagList);
+      return cb(tagList);
     });
   };
 
