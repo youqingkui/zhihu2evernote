@@ -134,9 +134,6 @@
       if (endErr) {
         return cb(endErr);
       }
-      console.log("++++++++++++++++++++++++");
-      console.log(result);
-      console.log("++++++++++++++++++++++++");
       tagList = result[0];
       content = result[1][0];
       resourceArr = result[1][1];
@@ -153,7 +150,7 @@
   getTag = function(url, cb) {
     var op;
     op = reqOp(url);
-    console.log("tag url ==>", op);
+    console.log("tag url ==>", op.url);
     return request.get(op, function(err, res, body) {
       var $, tagArr, tagList;
       if (err) {

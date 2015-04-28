@@ -93,9 +93,9 @@ composeCreateNote = ($, title, tagUrl, sourceUrl, noteStore, cb) ->
 
   ],(endErr, result) ->
     return cb(endErr) if endErr
-    console.log "++++++++++++++++++++++++"
-    console.log result
-    console.log "++++++++++++++++++++++++"
+#    console.log "++++++++++++++++++++++++"
+#    console.log result
+#    console.log "++++++++++++++++++++++++"
     tagList = result[0]
     content = result[1][0]
     resourceArr = result[1][1]
@@ -109,7 +109,7 @@ composeCreateNote = ($, title, tagUrl, sourceUrl, noteStore, cb) ->
 # 获取标签
 getTag = (url, cb) ->
   op = reqOp(url)
-  console.log "tag url ==>", op
+  console.log "tag url ==>", op.url
   request.get op, (err, res, body) ->
     if err
       console.log err
