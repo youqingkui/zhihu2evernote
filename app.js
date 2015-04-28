@@ -54,21 +54,33 @@
       },
       getContent: [
         'getPage', function(c, result) {
-          var $, answerList, noteArr, oldTitle;
+          var $, answerList, noteArr, oldSourceUrl, oldTitle;
           answerList = result.getPage[0];
           $ = result.getPage[1];
           noteArr = [];
           oldTitle = '';
+          oldSourceUrl = '';
           return async.eachSeries(answerList, function(item, callback) {
-            var $2, content1, tagUrl, title;
+            var $2, content1, sourceUrl, tagFind, tagUrl, title;
             title = $(item).find("h2.zm-item-title").text();
             if (!title) {
               title = oldTitle;
             }
             oldTitle = title;
+            sourceUrl = $(item).find("h2.zm-item-title a").attr('href');
+            if (!sourceUrl) {
+              sourceUrl = oldSourceUrl;
+            } else {
+              sourceUrl = 'http://www.zhihu.com' + sourceUrl;
+            }
+            oldSourceUrl = sourceUrl;
             content1 = $(item).find(".content.hidden").text();
-            tagUrl = $(item).find("a.toggle-expand").attr('href');
-            tagUrl = 'http://www.zhihu.com' + tagUrl;
+            tagFind = $(item).find("a.toggle-expand");
+            if (!tagFind) {
+              tagUrl = sourceUrl;
+            } else {
+              tagUrl = 'http://www.zhihu.com' + $(tagFind).attr('href');
+            }
             $2 = cheerio.load(content1, {
               decodeEntities: false
             });

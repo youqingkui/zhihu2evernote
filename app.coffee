@@ -39,21 +39,24 @@ pageImport = (op, cb) ->
 
       noteArr = []
       oldTitle = ''
-#      oldSourceUrl = ''
+      oldSourceUrl = ''
       async.eachSeries answerList, (item, callback) ->
         title = $(item).find("h2.zm-item-title").text()
         if not title
           title = oldTitle
         oldTitle = title
-#        sourceUrl = $(item).find("h2.zm-item-title a").attr('href')
-#        if not sourceUrl
-#          sourceUrl = oldSourceUrl
-#        else
-#          sourceUrl = 'http://www.zhihu.com' + sourceUrl
-#        oldSourceUrl = sourceUrl
+        sourceUrl = $(item).find("h2.zm-item-title a").attr('href')
+        if not sourceUrl
+          sourceUrl = oldSourceUrl
+        else
+          sourceUrl = 'http://www.zhihu.com' + sourceUrl
+        oldSourceUrl = sourceUrl
         content1 = $(item).find(".content.hidden").text()
-        tagUrl = $(item).find("a.toggle-expand").attr('href')
-        tagUrl = 'http://www.zhihu.com' + tagUrl
+        tagFind = $(item).find("a.toggle-expand")
+        if not tagFind
+          tagUrl = sourceUrl
+        else
+          tagUrl = 'http://www.zhihu.com' + $(tagFind).attr('href')
 
         $2 = cheerio.load(content1, {decodeEntities: false})
         # 移除其他属性
