@@ -13,7 +13,6 @@ nodeUrl = require('url')
 reqOp = (url) ->
   options =
     url:url
-#    timeout:5000
     headers:
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36',
       'Cookie':cookie
@@ -160,10 +159,12 @@ readImgRes = (imgUrl, cb) ->
       request.get op, (err, res, body) ->
         return cb(err) if err
 #        return fs.writeFileSync('test.jpg', body, 'binary')
-        callback(null, body)
+        mimeType = res.headers['content-type']
+        callback(null, body, mimeType)
 
     enImg:['readImg', (callback, result) ->
-      image = new Buffer(result.readImg, 'binary')
+      mimeType = result.readImg[1]
+      image = new Buffer(result.readImg[0], 'binary')
       hash = image.toString('base64')
 
       data = new Evernote.Data()
@@ -172,9 +173,7 @@ readImgRes = (imgUrl, cb) ->
       data.body = image
 
       resource = new Evernote.Resource()
-#      resource.mime = mime.lookup(image)
-      resource.mime = 'image/jpeg '
-      res.headers['content-type']
+      resource.mime = mimeType
       resource.data = data
       resource.image = image
       cb(null, resource)

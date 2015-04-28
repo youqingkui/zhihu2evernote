@@ -1,6 +1,7 @@
 Evernote = require('evernote').Evernote
 
 #developerToken = process.env.DeveloperToken
+developerToken = process.env.DeveloperTokenTest
 client = new Evernote.Client({
   token:developerToken
 })

@@ -198,24 +198,26 @@
     return async.auto({
       readImg: function(callback) {
         return request.get(op, function(err, res, body) {
+          var mimeType;
           if (err) {
             return cb(err);
           }
-          return callback(null, body);
+          mimeType = res.headers['content-type'];
+          return callback(null, body, mimeType);
         });
       },
       enImg: [
         'readImg', function(callback, result) {
-          var data, hash, image, resource;
-          image = new Buffer(result.readImg, 'binary');
+          var data, hash, image, mimeType, resource;
+          mimeType = result.readImg[1];
+          image = new Buffer(result.readImg[0], 'binary');
           hash = image.toString('base64');
           data = new Evernote.Data();
           data.size = image.length;
           data.bodyHash = hash;
           data.body = image;
           resource = new Evernote.Resource();
-          resource.mime = 'image/jpeg ';
-          res.headers['content-type'];
+          resource.mime = mimeType;
           resource.data = data;
           resource.image = image;
           return cb(null, resource);
