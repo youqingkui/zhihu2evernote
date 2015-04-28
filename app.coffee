@@ -199,7 +199,7 @@ getPageCount = (url, cb) ->
 
     cb(null, Number(pageCount))
 
-op = reqOp('http://www.zhihu.com/collection/29469118?page=9')
+op = reqOp('http://www.zhihu.com/collection/29469118')
 
 async.auto
   getPage:(cb) ->
