@@ -53,7 +53,7 @@ pageImport = (op, cb) ->
         oldSourceUrl = sourceUrl
         content1 = $(item).find(".content.hidden").text()
         tagFind = $(item).find("a.toggle-expand")
-        if not tagFind
+        if not tagFind.length
           tagUrl = sourceUrl
         else
           tagUrl = 'http://www.zhihu.com' + $(tagFind).attr('href')

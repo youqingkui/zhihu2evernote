@@ -76,7 +76,7 @@
             oldSourceUrl = sourceUrl;
             content1 = $(item).find(".content.hidden").text();
             tagFind = $(item).find("a.toggle-expand");
-            if (!tagFind) {
+            if (!tagFind.length) {
               tagUrl = sourceUrl;
             } else {
               tagUrl = 'http://www.zhihu.com' + $(tagFind).attr('href');
