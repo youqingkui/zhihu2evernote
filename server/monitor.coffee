@@ -30,7 +30,7 @@ class Monitor
     self._xsrf = self.$("input[name='_xsrf']").val()
     favDivList = self.$("div.zm-item")
     favList = self.$("div.zm-item ins > a")
-    
+
 
 
   createNote: (noteStore, title, tags, content, soureUrl, resArr, cb) ->
