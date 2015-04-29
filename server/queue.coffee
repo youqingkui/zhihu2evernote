@@ -2,13 +2,18 @@ async = require('async')
 makeNote = require('./createNote')
 request = require('request')
 cheerio = require('cheerio')
+Evernote = require('evernote').Evernote
+crypto = require('crypto')
+#SyncLog = require('../models/sync-log')
 
 
 
-q = async.queue (url, noteStore, cookie, cb) ->
-  console.log "noteStore", noteStore
-  console.log('worker is processing task: ', url, cookie)
-  task = new Save2Evernote(url, noteStore, cookie)
+
+
+
+q = async.queue (data, cb) ->
+  console.log('worker is processing task: ', data.url)
+  task = new Save2Evernote(data.url, data.noteStore, data.cookie)
   async.series [
     (callback) ->
       task.getUrlPage (err) ->
@@ -32,11 +37,16 @@ q = async.queue (url, noteStore, cookie, cb) ->
 
         callback()
 
+    (callback) ->
+      task.saveLog (err) ->
+        return cb(err) if err
+        callback()
+
   ],(err) ->
     return cb(err) if err
-    console.log("worker is end task: ", url, noteStore, cookie)
+    console.log("worker is end task: ", data.url)
     cb()
-, 2
+, 10
 
 
 q.saturated = () ->
@@ -68,7 +78,7 @@ class Save2Evernote
     request.get op, (err, res, body) ->
       return cb(err) if err
 
-      $ = cheerio.load body
+      $ = cheerio.load body, {decodeEntities: false}
       self.$ = $
       cb()
 
@@ -92,17 +102,20 @@ class Save2Evernote
   # 转换内容
   changeContent: (cb) ->
     self = @
-    $ = cheerio.load(self.content)
+    $ = cheerio.load(self.content, {decodeEntities: false})
+    $("noscript").remove()
     $("a, span, img, i, div, code")
     .map (i, elem) ->
       for k of elem.attribs
-        if k != 'src'
+        if k != 'data-actualsrc'
           $(this).removeAttr(k)
 
     imgs = $("img")
+    console.log imgs.length
     async.each imgs, (item, callback) ->
-      src = $(item).attr('src')
-      readImgRes src, (err, resource) ->
+      src = $(item).attr('data-actualsrc')
+      console.log "src ==>",src
+      self.readImgRes src, (err, resource) ->
         return cb(err) if err
 
         self.resourceArr.push resource
@@ -116,7 +129,8 @@ class Save2Evernote
         callback()
 
     ,() ->
-      self.enContent = $.html({xmlMode:true})
+      self.enContent = $.html({xmlMode:true, decodeEntities: false})
+
       cb()
 
   # 创建笔记
@@ -130,6 +144,21 @@ class Save2Evernote
         console.log "+++++++++++++++++++++++"
 
         cb()
+
+  # 保存记录
+  saveLog: (cb) ->
+    logs = new SyncLog()
+    logs.title = @title
+    logs.content = @content
+    logs.created = Date.parse(new Date())
+    logs.updated = logs.created
+    logs.tagNames = @tagArr
+    logs.href = @url
+    logs.save (err, row) ->
+      return cb(err) if err
+
+      cb()
+
 
   # 读取远程图片
   readImgRes: (imgUrl, cb) ->
