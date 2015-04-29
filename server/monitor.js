@@ -21,6 +21,7 @@
       this.cookie = cookie;
       this.$ = null;
       this._xsrf = '';
+      this.offset = 0;
     }
 
     Monitor.prototype.getLogPage = function(cb) {
@@ -71,9 +72,11 @@
       var op, self;
       self = this;
       op = self.reqOp(self.colUrl + '/log');
+      self.offset += 20;
       op.form = {
         start: start,
-        _xsrf: self._xsrf
+        _xsrf: self._xsrf,
+        offset: self.offset
       };
       return request.post(op, function(err, res, body) {
         var $, data;
@@ -81,13 +84,13 @@
           return cb(err);
         }
         data = JSON.parse(body);
-        console.log(data);
+        console.log("data.msg[0]", data.msg[0]);
         if (data.msg[0] !== 0) {
           $ = cheerio.load(data.msg[1]);
           return self.checkFav($, cb);
         } else {
           console.log("==================================================");
-          console.log("stop here", start);
+          console.log("stop here", start, self.offset);
           console.log("==================================================");
           return cb();
         }

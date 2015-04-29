@@ -52,7 +52,7 @@
       console.log("worker is end task: ", data.url);
       return cb();
     });
-  }, 1);
+  }, 15);
 
   q.saturated = function() {
     return console.log('all workers to be used');

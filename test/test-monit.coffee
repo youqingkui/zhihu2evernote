@@ -5,7 +5,7 @@ async = require('async')
 
 
 
-url = 'http://www.zhihu.com/collection/29469118'
+url = 'http://www.zhihu.com/collection/21017107'
 m = new monit(url, noteStore, cookie)
 
 async.series [

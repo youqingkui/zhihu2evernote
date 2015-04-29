@@ -13,6 +13,7 @@ class Monitor
   constructor: (@colUrl, @noteStore, @cookie) ->
     @$ = null
     @_xsrf = ''
+    @offset = 0
 
 
   getLogPage: (cb) ->
@@ -49,18 +50,19 @@ class Monitor
   repeatDo: (start, cb) ->
     self = @
     op = self.reqOp(self.colUrl + '/log')
-    op.form = {start:start, _xsrf:self._xsrf}
+    self.offset += 20
+    op.form = {start:start, _xsrf:self._xsrf, offset:self.offset}
     request.post op, (err, res, body) ->
       return cb(err) if err
       data = JSON.parse(body)
-      console.log data
+      console.log "data.msg[0]", data.msg[0]
       if data.msg[0] != 0
         $ = cheerio.load(data.msg[1])
         self.checkFav $, cb
 
       else
         console.log "=================================================="
-        console.log "stop here", start
+        console.log "stop here", start, self.offset
         console.log "=================================================="
 
         cb()
