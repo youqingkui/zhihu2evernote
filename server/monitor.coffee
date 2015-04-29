@@ -38,6 +38,7 @@ class Monitor
     favList.each (i, elem) ->
       href = 'http://www.zhihu.com' + $(elem).attr('href')
       console.log "add task", href
+      console.log('waiting tasks: ', queue.length())
       queue.push {url:href, noteStore:noteStore, cookie:cookie},
         (err) ->
           return console.log err if err

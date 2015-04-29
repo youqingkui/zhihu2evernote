@@ -53,6 +53,7 @@
         var href;
         href = 'http://www.zhihu.com' + $(elem).attr('href');
         console.log("add task", href);
+        console.log('waiting tasks: ', queue.length());
         return queue.push({
           url: href,
           noteStore: noteStore,
