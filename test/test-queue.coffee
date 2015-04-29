@@ -13,16 +13,16 @@ queue.push(
     return console.log err if err
 )
 
-#queue.push(
-#  {url:url2, noteStore:noteStore, cookie:cookie},
-#  (err) ->
-#    return console.log err if err
-#)
-#
-#
-#queue.push(
-#  {url:url3, noteStore:noteStore, cookie:cookie},
-#  (err) ->
-#    return console.log err if err
-#)
+queue.push(
+  {url:url2, noteStore:noteStore, cookie:cookie},
+  (err) ->
+    return console.log err if err
+)
+
+
+queue.push(
+  {url:url3, noteStore:noteStore, cookie:cookie},
+  (err) ->
+    return console.log err if err
+)
 

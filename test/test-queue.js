@@ -24,6 +24,26 @@
     }
   });
 
+  queue.push({
+    url: url2,
+    noteStore: noteStore,
+    cookie: cookie
+  }, function(err) {
+    if (err) {
+      return console.log(err);
+    }
+  });
+
+  queue.push({
+    url: url3,
+    noteStore: noteStore,
+    cookie: cookie
+  }, function(err) {
+    if (err) {
+      return console.log(err);
+    }
+  });
+
 }).call(this);
 
 //# sourceMappingURL=test-queue.js.map
