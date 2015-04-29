@@ -17,7 +17,8 @@ async.series [
       cb()
 
   (cb) ->
-    m.checkFav (err) ->
+    $ = m.$
+    m.checkFav $, (err) ->
       return console.log err if err
 
       cb()

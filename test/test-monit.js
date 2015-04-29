@@ -24,7 +24,9 @@
         return cb();
       });
     }, function(cb) {
-      return m.checkFav(function(err) {
+      var $;
+      $ = m.$;
+      return m.checkFav($, function(err) {
         if (err) {
           return console.log(err);
         }

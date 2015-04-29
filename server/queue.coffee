@@ -46,7 +46,7 @@ q = async.queue (data, cb) ->
     return cb(err) if err
     console.log("worker is end task: ", data.url)
     cb()
-, 10
+, 1
 
 
 q.saturated = () ->

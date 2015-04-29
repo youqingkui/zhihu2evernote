@@ -15,30 +15,56 @@ class Monitor
     @_xsrf = ''
 
 
-
-
   getLogPage: (cb) ->
     self = @
     op = self.reqOp(self.colUrl + '/log')
     request.get op, (err, res, body) ->
       return cb(err) if err
       $ = cheerio.load body, {decodeEntities: false}
-      console.log body
       self.$ = $
+      self._xsrf = self.$("input[name='_xsrf']").val()
+
       cb()
 
-  checkFav: (cb) ->
+  checkFav: ($ , cb) ->
     self = @
-    self._xsrf = self.$("input[name='_xsrf']").val()
-    favDivList = self.$("div.zm-item")
-    favList = self.$("div.zm-item ins > a")
+
+    favDivList = $("div.zm-item")
+    start = favDivList[favDivList.length - 1]
+    startID = $(start).attr('id')
+    startNum = startID.split('-')[1]
+
+    favList = $("div.zm-item ins > a")
     favList.each (i, elem) ->
-      href = 'http://www.zhihu.com' + self.$(elem).attr('href')
+      href = 'http://www.zhihu.com' + $(elem).attr('href')
+      console.log "add task", href
       queue.push {url:href, noteStore:noteStore, cookie:cookie},
         (err) ->
           return console.log err if err
 
-    cb()
+    self.repeatDo startNum, cb
+
+
+  repeatDo: (start, cb) ->
+    self = @
+    op = self.reqOp(self.colUrl + '/log')
+    op.form = {start:start, _xsrf:self._xsrf}
+    request.post op, (err, res, body) ->
+      return cb(err) if err
+      data = JSON.parse(body)
+      console.log data
+      if data.msg[0] != 0
+        $ = cheerio.load(data.msg[1])
+        self.checkFav $, cb
+
+      else
+        console.log "=================================================="
+        console.log "stop here", start
+        console.log "=================================================="
+
+        cb()
+
+
 
   reqOp: (url) ->
     options =

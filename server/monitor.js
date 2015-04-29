@@ -35,21 +35,24 @@
         $ = cheerio.load(body, {
           decodeEntities: false
         });
-        console.log(body);
         self.$ = $;
+        self._xsrf = self.$("input[name='_xsrf']").val();
         return cb();
       });
     };
 
-    Monitor.prototype.checkFav = function(cb) {
-      var favDivList, favList, self;
+    Monitor.prototype.checkFav = function($, cb) {
+      var favDivList, favList, self, start, startID, startNum;
       self = this;
-      self._xsrf = self.$("input[name='_xsrf']").val();
-      favDivList = self.$("div.zm-item");
-      favList = self.$("div.zm-item ins > a");
+      favDivList = $("div.zm-item");
+      start = favDivList[favDivList.length - 1];
+      startID = $(start).attr('id');
+      startNum = startID.split('-')[1];
+      favList = $("div.zm-item ins > a");
       favList.each(function(i, elem) {
         var href;
-        href = 'http://www.zhihu.com' + self.$(elem).attr('href');
+        href = 'http://www.zhihu.com' + $(elem).attr('href');
+        console.log("add task", href);
         return queue.push({
           url: href,
           noteStore: noteStore,
@@ -60,7 +63,34 @@
           }
         });
       });
-      return cb();
+      return self.repeatDo(startNum, cb);
+    };
+
+    Monitor.prototype.repeatDo = function(start, cb) {
+      var op, self;
+      self = this;
+      op = self.reqOp(self.colUrl + '/log');
+      op.form = {
+        start: start,
+        _xsrf: self._xsrf
+      };
+      return request.post(op, function(err, res, body) {
+        var $, data;
+        if (err) {
+          return cb(err);
+        }
+        data = JSON.parse(body);
+        console.log(data);
+        if (data.msg[0] !== 0) {
+          $ = cheerio.load(data.msg[1]);
+          return self.checkFav($, cb);
+        } else {
+          console.log("==================================================");
+          console.log("stop here", start);
+          console.log("==================================================");
+          return cb();
+        }
+      });
     };
 
     Monitor.prototype.reqOp = function(url) {
