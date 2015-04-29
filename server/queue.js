@@ -44,13 +44,6 @@
           }
           return callback();
         });
-      }, function(callback) {
-        return task.saveLog(function(err) {
-          if (err) {
-            return cb(err);
-          }
-          return callback();
-        });
       }
     ], function(err) {
       if (err) {
@@ -176,23 +169,6 @@
         console.log("+++++++++++++++++++++++");
         console.log("" + note.title + " create ok");
         console.log("+++++++++++++++++++++++");
-        return cb();
-      });
-    };
-
-    Save2Evernote.prototype.saveLog = function(cb) {
-      var logs;
-      logs = new SyncLog();
-      logs.title = this.title;
-      logs.content = this.content;
-      logs.created = Date.parse(new Date());
-      logs.updated = logs.created;
-      logs.tagNames = this.tagArr;
-      logs.href = this.url;
-      return logs.save(function(err, row) {
-        if (err) {
-          return cb(err);
-        }
         return cb();
       });
     };

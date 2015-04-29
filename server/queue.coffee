@@ -37,10 +37,10 @@ q = async.queue (data, cb) ->
 
         callback()
 
-    (callback) ->
-      task.saveLog (err) ->
-        return cb(err) if err
-        callback()
+#    (callback) ->
+#      task.saveLog (err) ->
+#        return cb(err) if err
+#        callback()
 
   ],(err) ->
     return cb(err) if err
@@ -145,19 +145,19 @@ class Save2Evernote
 
         cb()
 
-  # 保存记录
-  saveLog: (cb) ->
-    logs = new SyncLog()
-    logs.title = @title
-    logs.content = @content
-    logs.created = Date.parse(new Date())
-    logs.updated = logs.created
-    logs.tagNames = @tagArr
-    logs.href = @url
-    logs.save (err, row) ->
-      return cb(err) if err
-
-      cb()
+#  # 保存记录
+#  saveLog: (cb) ->
+#    logs = new SyncLog()
+#    logs.title = @title
+#    logs.content = @content
+#    logs.created = Date.parse(new Date())
+#    logs.updated = logs.created
+#    logs.tagNames = @tagArr
+#    logs.href = @url
+#    logs.save (err, row) ->
+#      return cb(err) if err
+#
+#      cb()
 
 
   # 读取远程图片
