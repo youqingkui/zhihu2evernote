@@ -35,7 +35,9 @@
       return request.get(op, function(err, res, body) {
         var $;
         if (err) {
-          return saveErr(self.colUrl, 1, err, cb);
+          return saveErr(self.colUrl, 1, {
+            err: err
+          }, cb);
         }
         $ = cheerio.load(body, {
           decodeEntities: false
@@ -98,7 +100,10 @@
           data = JSON.parse(body);
         } catch (_error) {
           err = _error;
-          saveErr(op.url, 3, body);
+          saveErr(op.url, 3, {
+            body: body,
+            start: start
+          });
           return cb();
         }
         console.log("data.msg[0]", data.msg[0]);

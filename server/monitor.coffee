@@ -21,7 +21,7 @@ class Monitor
     self = @
     op = self.reqOp(self.colUrl + '/log')
     request.get op, (err, res, body) ->
-      return saveErr(self.colUrl, 1, err, cb) if err
+      return saveErr(self.colUrl, 1, {err:err}, cb) if err
       $ = cheerio.load body, {decodeEntities: false}
       self.$ = $
       self._xsrf = self.$("input[name='_xsrf']").val()
@@ -64,7 +64,7 @@ class Monitor
       try
         data = JSON.parse(body)
       catch err
-        saveErr(op.url, 3, body)
+        saveErr(op.url, 3, {body:body, start:start})
         return cb()
 
       console.log "data.msg[0]", data.msg[0]

@@ -6,13 +6,13 @@
 
   email = require('./email')();
 
-  saveErr = function(href, type, info, cb) {
+  saveErr = function(href, type, infoJson, cb) {
     var emailBody, log;
-    console.log(info);
+    console.log(infoJson.err);
     log = new ErrLog();
     log.href = href;
     log.type = type;
-    log.info = info;
+    log.info = JSON.stringify(infoJson);
     log.save(function(err, row) {
       if (err) {
         return console.log(err);
@@ -21,7 +21,7 @@
     emailBody = JSON.stringify(log);
     email.send(emailBody);
     if (cb) {
-      return cb(info);
+      return cb(infoJson.err);
     }
   };
 

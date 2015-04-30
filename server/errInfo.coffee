@@ -2,13 +2,13 @@ ErrLog = require('../models/err-log')
 email = require('./email')()
 
 
-saveErr = (href, type, info, cb) ->
-  console.log info
+saveErr = (href, type, infoJson, cb) ->
+  console.log infoJson.err
 
   log = new ErrLog()
   log.href = href
   log.type = type
-  log.info = info
+  log.info = JSON.stringify(infoJson)
 
   log.save (err, row) ->
     return console.log err if err
@@ -17,7 +17,7 @@ saveErr = (href, type, info, cb) ->
   email.send(emailBody)
 
   if cb
-    cb(info)
+    cb(infoJson.err)
 
 
 

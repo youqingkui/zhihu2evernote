@@ -75,7 +75,7 @@ class Save2Evernote
     self = @
     op = self.reqOp(self.url)
     request.get op, (err, res, body) ->
-      return saveErr(self.url, 4, err, cb) if err
+      return saveErr(self.url, 4, {err:err}, cb) if err
 
       $ = cheerio.load body, {decodeEntities: false}
       self.$ = $
@@ -91,7 +91,7 @@ class Save2Evernote
       tagName = $(elem).text().trim()
       self.tagArr.push tagName
 
-    self.title = $("#zh-question-title .zm-item-title a").text()
+    self.title = $("#zh-question-title .zm-item-title a").text().trim().replace(/\n/g, '')
 
     self.content = $(".zm-item-answer .zm-editable-content").html()
     self.timeInfo = $("#zh-question-answer-wrap span.answer-date-link-wrap").text()
@@ -106,15 +106,18 @@ class Save2Evernote
     $("a, span, img, i, div, code")
     .map (i, elem) ->
       for k of elem.attribs
-        if k != 'data-actualsrc'
+        if k != 'data-actualsrc' and k != 'src'
           $(this).removeAttr(k)
 
     imgs = $("img")
     async.each imgs, (item, callback) ->
       src = $(item).attr('data-actualsrc')
+      if not src
+        console.log item
+        src = $(item).attr('src')
       console.log "src ==>",src
       self.readImgRes src, (err, resource) ->
-        return saveErr(href, 5, err, cb) if err
+        return saveErr(src, 5, {err:err, title:self.title, url:self.url}, cb) if err
 
         self.resourceArr.push resource
         md5 = crypto.createHash('md5')
@@ -135,7 +138,8 @@ class Save2Evernote
     self = @
     makeNote @noteStore, @title, @tagArr, @enContent, @url, @resourceArr,
       (err, note) ->
-        return saveErr(self.url, 6, err, cb) if err
+        console.log "@@@ #{self.title} @@@@@"
+        return saveErr(self.url, 6, {err:err, title:self.title}, cb) if err
 
         console.log "+++++++++++++++++++++++"
         console.log "#{note.title} create ok"

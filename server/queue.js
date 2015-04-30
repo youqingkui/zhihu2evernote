@@ -97,7 +97,9 @@
       return request.get(op, function(err, res, body) {
         var $;
         if (err) {
-          return saveErr(self.url, 4, err, cb);
+          return saveErr(self.url, 4, {
+            err: err
+          }, cb);
         }
         $ = cheerio.load(body, {
           decodeEntities: false
@@ -117,7 +119,7 @@
         tagName = $(elem).text().trim();
         return self.tagArr.push(tagName);
       });
-      self.title = $("#zh-question-title .zm-item-title a").text();
+      self.title = $("#zh-question-title .zm-item-title a").text().trim().replace(/\n/g, '');
       self.content = $(".zm-item-answer .zm-editable-content").html();
       self.timeInfo = $("#zh-question-answer-wrap span.answer-date-link-wrap").text();
       self.content += self.timeInfo;
@@ -135,7 +137,7 @@
         var k, _results;
         _results = [];
         for (k in elem.attribs) {
-          if (k !== 'data-actualsrc') {
+          if (k !== 'data-actualsrc' && k !== 'src') {
             _results.push($(this).removeAttr(k));
           } else {
             _results.push(void 0);
@@ -147,11 +149,19 @@
       return async.each(imgs, function(item, callback) {
         var src;
         src = $(item).attr('data-actualsrc');
+        if (!src) {
+          console.log(item);
+          src = $(item).attr('src');
+        }
         console.log("src ==>", src);
         return self.readImgRes(src, function(err, resource) {
           var hexHash, md5, newTag;
           if (err) {
-            return saveErr(href, 5, err, cb);
+            return saveErr(src, 5, {
+              err: err,
+              title: self.title,
+              url: self.url
+            }, cb);
           }
           self.resourceArr.push(resource);
           md5 = crypto.createHash('md5');
@@ -174,8 +184,12 @@
       var self;
       self = this;
       return makeNote(this.noteStore, this.title, this.tagArr, this.enContent, this.url, this.resourceArr, function(err, note) {
+        console.log("@@@ " + self.title + " @@@@@");
         if (err) {
-          return saveErr(self.url, 6, err, cb);
+          return saveErr(self.url, 6, {
+            err: err,
+            title: self.title
+          }, cb);
         }
         console.log("+++++++++++++++++++++++");
         console.log("" + note.title + " create ok");
