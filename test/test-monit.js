@@ -10,7 +10,7 @@
 
   async = require('async');
 
-  url = 'http://www.zhihu.com/collection/19710429';
+  url = 'http://www.zhihu.com/collection/29469118';
 
   m = new monit(url, noteStore, cookie);
 
