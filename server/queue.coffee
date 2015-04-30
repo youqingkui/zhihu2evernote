@@ -4,9 +4,8 @@ request = require('request')
 cheerio = require('cheerio')
 Evernote = require('evernote').Evernote
 crypto = require('crypto')
-#SyncLog = require('../models/sync-log')
-
-
+SyncLog = require('../models/sync-log')
+saveErr = require('../server/errInfo')
 
 
 
@@ -37,10 +36,10 @@ q = async.queue (data, cb) ->
 
         callback()
 
-#    (callback) ->
-#      task.saveLog (err) ->
-#        return cb(err) if err
-#        callback()
+    (callback) ->
+      task.saveLog (err) ->
+        return cb(err) if err
+        callback()
 
   ],(err) ->
     return cb(err) if err
@@ -76,7 +75,7 @@ class Save2Evernote
     self = @
     op = self.reqOp(self.url)
     request.get op, (err, res, body) ->
-      return cb(err) if err
+      return saveErr(self.url, 4, err, cb) if err
 
       $ = cheerio.load body, {decodeEntities: false}
       self.$ = $
@@ -111,19 +110,17 @@ class Save2Evernote
           $(this).removeAttr(k)
 
     imgs = $("img")
-    console.log imgs.length
     async.each imgs, (item, callback) ->
       src = $(item).attr('data-actualsrc')
       console.log "src ==>",src
       self.readImgRes src, (err, resource) ->
-        return cb(err) if err
+        return saveErr(href, 5, err, cb) if err
 
         self.resourceArr.push resource
         md5 = crypto.createHash('md5')
         md5.update(resource.image)
         hexHash = md5.digest('hex')
         newTag = "<en-media type=#{resource.mime} hash=#{hexHash} />"
-        console.log newTag
         $(item).replaceWith(newTag)
 
         callback()
@@ -135,9 +132,10 @@ class Save2Evernote
 
   # 创建笔记
   createNote: (cb) ->
+    self = @
     makeNote @noteStore, @title, @tagArr, @enContent, @url, @resourceArr,
       (err, note) ->
-        return cb(err) if err
+        return saveErr(self.url, 6, err, cb) if err
 
         console.log "+++++++++++++++++++++++"
         console.log "#{note.title} create ok"
@@ -145,19 +143,19 @@ class Save2Evernote
 
         cb()
 
-#  # 保存记录
-#  saveLog: (cb) ->
-#    logs = new SyncLog()
-#    logs.title = @title
-#    logs.content = @content
-#    logs.created = Date.parse(new Date())
-#    logs.updated = logs.created
-#    logs.tagNames = @tagArr
-#    logs.href = @url
-#    logs.save (err, row) ->
-#      return cb(err) if err
-#
-#      cb()
+  # 保存记录
+  saveLog: (cb) ->
+    logs = new SyncLog()
+    logs.title = @title
+    logs.content = @content
+    logs.created = Date.parse(new Date())
+    logs.updated = logs.created
+    logs.tagNames = @tagArr
+    logs.href = @url
+    logs.save (err, row) ->
+      return cb(err) if err
+
+      cb()
 
 
   # 读取远程图片

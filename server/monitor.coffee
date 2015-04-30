@@ -1,10 +1,11 @@
-#SyncLog = require('../models/sync-log')
+SyncLog = require('../models/sync-log')
 request = require('request')
 cheerio = require('cheerio')
 async = require('async')
 cookie = process.env.ZhiHu
 queue = require('../server/queue')
 noteStore = require('../server/noteStore')
+saveErr = require('../server/errInfo')
 
 
 
@@ -20,7 +21,7 @@ class Monitor
     self = @
     op = self.reqOp(self.colUrl + '/log')
     request.get op, (err, res, body) ->
-      return cb(err) if err
+      return saveErr(self.colUrl, 1, err, cb) if err
       $ = cheerio.load body, {decodeEntities: false}
       self.$ = $
       self._xsrf = self.$("input[name='_xsrf']").val()
@@ -38,11 +39,16 @@ class Monitor
     favList = $("div.zm-item ins > a")
     favList.each (i, elem) ->
       href = 'http://www.zhihu.com' + $(elem).attr('href')
-      console.log "add task", href
-      console.log('waiting tasks: ', queue.length())
-      queue.push {url:href, noteStore:noteStore, cookie:cookie},
-        (err) ->
-          return console.log err if err
+      SyncLog.findOne {'href':href}, (err, row) ->
+        console.log err if err
+        if not row and href != self.colUrl
+          console.log "add task", href
+          console.log('waiting tasks: ', queue.length())
+          queue.push {url:href, noteStore:noteStore, cookie:cookie},
+            (err) ->
+#              return console.log err if err
+        else
+          console.log "aleary sync this", href
 
     self.repeatDo startNum, cb
 
@@ -53,8 +59,14 @@ class Monitor
     self.offset += 20
     op.form = {start:start, _xsrf:self._xsrf, offset:self.offset}
     request.post op, (err, res, body) ->
-      return cb(err) if err
-      data = JSON.parse(body)
+      return saveErr(op.url, 2, err, cb) if err
+
+      try
+        data = JSON.parse(body)
+      catch err
+        saveErr(op.url, 3, body)
+        return cb()
+
       console.log "data.msg[0]", data.msg[0]
       if data.msg[0] != 0
         $ = cheerio.load(data.msg[1])
