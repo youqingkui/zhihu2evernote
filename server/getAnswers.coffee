@@ -4,7 +4,8 @@ async = require('async')
 makeNote = require('./createNote')
 Evernote = require('evernote').Evernote
 crypto = require('crypto')
-
+SyncLog = require('../models/sync-log')
+saveErr = require('../server/errInfo')
 
 q = async.queue (data, cb) ->
   console.log "#{data.url} add queue"
@@ -19,9 +20,12 @@ q = async.queue (data, cb) ->
     (callback) ->
       g.createNote(callback)
 
+    (callback) ->
+      g.saveLog(callback)
+
   ],() ->
     cb()
-, 5
+, 2
 
 
 q.saturated = () ->
@@ -58,7 +62,7 @@ class GetAnswer
     }
 
     request.get op, (err, res, body) ->
-      return console.log err if err
+      return saveErr(op.url, 3, {err:err, fun:'getContent'},cb) if err
 
       data = JSON.parse(body)
       self.title = data.question.title
@@ -73,6 +77,7 @@ class GetAnswer
   # 转换内容
   changeContent: (cb) ->
     self = @
+#    return console.log "!!!!!!!!!!!!!"
     $ = cheerio.load(self.content, {decodeEntities: false})
     $("a, span, img, i, div, code")
     .map (i, elem) ->
@@ -117,6 +122,20 @@ class GetAnswer
         console.log "+++++++++++++++++++++++"
 
         cb()
+
+  # 保存记录
+  saveLog: (cb) ->
+    logs = new SyncLog()
+    logs.title = @title
+    logs.content = @content
+    logs.created = Date.parse(new Date())
+    logs.updated = logs.created
+    logs.tagNames = @tagArr
+    logs.href = @url
+    logs.save (err, row) ->
+      return cb(err) if err
+
+      cb()
 
 
   # 读取远程图片

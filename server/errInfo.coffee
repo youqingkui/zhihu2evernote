@@ -17,7 +17,7 @@ saveErr = (href, type, infoJson, cb) ->
   email.send(emailBody)
 
   if cb
-    cb(infoJson.err)
+    return cb(infoJson.err)
 
 
 
