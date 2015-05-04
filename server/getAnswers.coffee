@@ -21,7 +21,7 @@ q = async.queue (data, cb) ->
 
   ],() ->
     cb()
-, 2
+, 5
 
 
 q.saturated = () ->

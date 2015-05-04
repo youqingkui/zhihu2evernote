@@ -38,14 +38,17 @@
           _ref = data.data;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             i = _ref[_i];
+            console.log("" + i.url + " add queue, queue ==> " + (queue.length()));
             queue.push({
               url: i.url,
               noteStore: self.noteStore
             }, function() {
-              return console.log("do ok ==>", data.data.url);
+              return console.log("do ok ==>", i.url);
             });
           }
           return self.getColList(data.paging.next);
+        } else {
+          return console.log(data);
         }
       });
     };

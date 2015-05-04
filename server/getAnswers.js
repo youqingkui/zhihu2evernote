@@ -29,7 +29,7 @@
     ], function() {
       return cb();
     });
-  }, 2);
+  }, 5);
 
   q.saturated = function() {
     return console.log('all workers to be used');

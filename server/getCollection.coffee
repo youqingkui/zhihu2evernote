@@ -23,11 +23,16 @@ class GetCol
     requrest.get op, (err, res, body) ->
       return console.log err if err
       data = JSON.parse(body)
+#      console.log data
       if data.data.length
         for i in data.data
+          console.log "#{i.url} add queue, queue ==> #{queue.length()}"
           queue.push {url:i.url, noteStore:self.noteStore}, () ->
-            console.log "do ok ==>", data.data.url
+            console.log "do ok ==>", i.url
         self.getColList(data.paging.next)
+
+      else
+        console.log data
 
 
   getColInfo:() ->
