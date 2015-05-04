@@ -6,6 +6,37 @@ Evernote = require('evernote').Evernote
 crypto = require('crypto')
 
 
+q = async.queue (data, cb) ->
+  console.log "#{data.url} add queue"
+  g = new GetAnswer(data.url, data.noteStore)
+  async.series [
+    (callback) ->
+      g.getContent(callback)
+
+    (callback) ->
+      g.changeContent(callback)
+
+    (callback) ->
+      g.createNote(callback)
+
+  ],() ->
+    cb()
+, 2
+
+
+q.saturated = () ->
+  console.log('all workers to be used')
+
+
+q.empty = () ->
+  console.log('no more tasks wating')
+
+
+q.drain = () ->
+  console.log('all tasks have been processed')
+
+
+
 
 
 
@@ -53,7 +84,7 @@ class GetAnswer
     async.each imgs, (item, callback) ->
       src = $(item).attr('data-actualsrc')
       if not src
-        console.log item
+#        console.log item
         src = $(item).attr('src')
       console.log "src ==>",src
       self.readImgRes src, (err, resource) ->
@@ -118,7 +149,6 @@ class GetAnswer
       ]
 
   reqOp:(getUrl) ->
-    self =  @
     options =
       url:getUrl
       headers:
@@ -127,5 +157,5 @@ class GetAnswer
     return options
 
 
-module.exports = GetAnswer
+module.exports = q
 

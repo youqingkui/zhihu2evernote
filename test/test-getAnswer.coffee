@@ -1,19 +1,30 @@
-GetAnswer = require('../server/getAnswers')
+queue = require('../server/getAnswers')
 noteStore = require('../server/noteStore')
 async = require('async')
 
-url = 'https://api.zhihu.com/answers/44378067'
+data1 = {
+  url:'https://api.zhihu.com/answers/44378067'
+  noteStore:noteStore
+}
 
-g = new GetAnswer(url, noteStore)
+data2 = {
+  url:'https://api.zhihu.com/answers/20149124'
+  noteStore:noteStore
+}
 
-async.series [
-  (callback) ->
-    g.getContent(callback)
+data3 = {
+  url:'https://api.zhihu.com/answers/16406064'
+  noteStore:noteStore
+}
 
-  (callback) ->
-    g.changeContent(callback)
 
-  (callback) ->
-    g.createNote(callback)
+queue.push data1, () ->
+  console.log "data1 do ok"
 
-]
+
+queue.push data2, () ->
+  console.log "data2 do ok"
+
+
+queue.push data3, () ->
+  console.log "data3 do ok"

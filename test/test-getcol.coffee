@@ -1,6 +1,7 @@
 GetCol = require('../server/getCollection')
+noteStore = require('../server/noteStore')
 
-url = 'https://api.zhihu.com/collections/21437665/'
+url = 'https://api.zhihu.com/collections/21437665/answers'
 
-g = new GetCol(url)
-g.getColList()
+g = new GetCol(noteStore)
+g.getColList(url)
