@@ -24,9 +24,8 @@ class GetCol
     }
     requrest.get op, (err, res, body) ->
       return console.log err if err
-      console.log JSON.parse(body)
-
-
+      data = JSON.parse(body)
+      console.log data.data[0]
 
 
   getColInfo:() ->

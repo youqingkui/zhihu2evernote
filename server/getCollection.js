@@ -32,10 +32,12 @@
         gzip: true
       };
       return requrest.get(op, function(err, res, body) {
+        var data;
         if (err) {
           return console.log(err);
         }
-        return console.log(JSON.parse(body));
+        data = JSON.parse(body);
+        return console.log(data.data[0]);
       });
     };
 
