@@ -38,7 +38,7 @@
       }
       return cb();
     });
-  }, 2);
+  }, 10);
 
   q.saturated = function() {
     return console.log('all workers to be used');

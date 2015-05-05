@@ -26,7 +26,7 @@ q = async.queue (data, cb) ->
   ],(err) ->
     return cb(err) if err
     cb()
-, 2
+, 10
 
 
 q.saturated = () ->
