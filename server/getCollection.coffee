@@ -5,6 +5,7 @@ queue = require('../server/getAnswers')
 SyncLog = require('../models/sync-log')
 async = require('async')
 saveErr = require('../server/errInfo')
+Task = require('../models/task')
 
 
 
@@ -39,18 +40,15 @@ class GetCol
         if data.data.length
           answerList = data.data
           answerList.forEach (answer) ->
-            SyncLog.findOne {href:answer.url}, (err, row) ->
+            Task.findOne {url:answer.url}, (err, row) ->
               return saveErr url, 2, {err:err, answer:answer.url} if err
 
-              if not row
-                console.log "#{answer.url} add queue, queue ==> #{queue.length()}"
-                queue.push {url:answer.url, noteStore:self.noteStore}, (err) ->
-                  return console.log "#{answer.url}
-                          do has err:#{err} 剩余队列数#{queue.length()}" if err
-                  console.log "do ok #{answer.url} 剩余队列数:#{queue.length()}"
+              if row
+                console.log "already exits ==>", url
 
               else
-                console.log "already exits ==>", answer.url
+                self.addTask url, (err2) ->
+                  
 
           self.getColList(data.paging.next)
 
@@ -58,6 +56,54 @@ class GetCol
           console.log data
 
       ]
+
+
+  checkTask:(url, cb) ->
+    self = @
+
+    Task.findOne {url:url}, (err, row) ->
+      return cb(err) if err
+
+      if row
+        console.log "already exits ==>", url
+
+      else
+        self.addTask(url, cb)
+
+
+  addTask:(url, cb) ->
+    self = @
+    queue.push {url:url, noteStore:self.noteStore}, (err) ->
+      if err
+        console.log err
+        self.changeStatus url, 2, cb
+
+      else
+        self.changeStatus url, 3, cb
+
+
+  changeStatus: (url, status, cb) ->
+    async.auto
+      findUrl:(callback) ->
+        Task.findOne {url:url}, (err, row) ->
+          return cb(err) if err
+
+          callback(null, row) if row
+
+
+      change:['findUrl', (callback, result) ->
+        row = result.findUrl
+        row.status = status
+        row.save (err, row) ->
+          return cb(err) if err
+
+          cb()
+      ]
+
+
+
+
+
 
 
   getColInfo:() ->
