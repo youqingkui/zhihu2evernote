@@ -85,6 +85,8 @@
         self.tagArr = [];
         self.sourceUrl = 'http://www.zhihu.com/question/' + data.question.id + '/answer/' + data.id;
         self.content = data.content;
+        self.created = data.created_time;
+        self.updated = data.updated_time;
         return cb();
       });
     };
@@ -145,7 +147,7 @@
     GetAnswer.prototype.createNote = function(cb) {
       var self;
       self = this;
-      return makeNote(this.noteStore, this.title, this.tagArr, this.enContent, this.sourceUrl, this.resourceArr, function(err, note) {
+      return makeNote(this.noteStore, this.title, this.tagArr, this.enContent, this.sourceUrl, this.resourceArr, this.created, this.updated, function(err, note) {
         if (err) {
           if (err) {
             return saveErr(self.url, 6, {
@@ -165,9 +167,8 @@
       var logs;
       logs = new SyncLog();
       logs.title = this.title;
-      logs.content = this.content;
-      logs.created = Date.parse(new Date());
-      logs.updated = logs.created;
+      logs.created = this.created;
+      logs.updated = this.updated;
       logs.tagNames = this.tagArr;
       logs.href = this.url;
       return logs.save(function(err, row) {

@@ -4,7 +4,7 @@
 
   Evernote = require('evernote').Evernote;
 
-  makeNote = function(noteStore, noteTitle, tagList, noteBody, sourceUrl, resources, callback) {
+  makeNote = function(noteStore, noteTitle, tagList, noteBody, sourceUrl, resources, created, updated, callback) {
     var attr, nBody, ourNote;
     nBody = '<?xml version="1.0" encoding="UTF-8"?>';
     nBody += '<!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">';
@@ -17,13 +17,15 @@
     ourNote.attributes = attr;
     ourNote.resources = resources;
     ourNote.tagNames = tagList;
+    ourNote.created = created * 1000;
+    ourNote.updated = updated * 1000;
+    console.log(ourNote.created);
     return noteStore.createNote(ourNote, function(err, note) {
       if (err) {
         console.log(err);
         console.log(noteTitle);
         return callback(err);
       } else {
-        console.log("i'm ok");
         return callback(null, note);
       }
     });

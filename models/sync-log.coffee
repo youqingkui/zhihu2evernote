@@ -2,7 +2,6 @@ mongoose = require('./mongoose')
 
 SyncLogSchema = mongoose.Schema
   title:String
-  content:String
   created:Number
   updated:Number
   tagNames:Array

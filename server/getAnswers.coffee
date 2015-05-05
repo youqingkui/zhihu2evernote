@@ -72,6 +72,8 @@ class GetAnswer
                 data.question.id + '/answer/' + data.id
 
       self.content = data.content
+      self.created = data.created_time
+      self.updated = data.updated_time
 
       cb()
 
@@ -114,6 +116,7 @@ class GetAnswer
   createNote: (cb) ->
     self = @
     makeNote @noteStore, @title, @tagArr, @enContent, @sourceUrl, @resourceArr,
+      @created, @updated
       (err, note) ->
         if err
           return saveErr(self.url, 6, {err:err, title:self.title}, cb) if err
@@ -128,9 +131,8 @@ class GetAnswer
   saveLog: (cb) ->
     logs = new SyncLog()
     logs.title = @title
-    logs.content = @content
-    logs.created = Date.parse(new Date())
-    logs.updated = logs.created
+    logs.created = @created
+    logs.updated = @updated
     logs.tagNames = @tagArr
     logs.href = @url
     logs.save (err, row) ->
