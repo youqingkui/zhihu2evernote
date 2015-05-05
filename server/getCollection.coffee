@@ -44,12 +44,13 @@ class GetCol
 
               if not row
                 console.log "#{answer.url} add queue, queue ==> #{queue.length()}"
-                queue.push {url:answer.url, noteStore:self.noteStore}, () ->
-                  console.log "do ok ==>", answer.url
+                queue.push {url:answer.url, noteStore:self.noteStore}, (err) ->
+                  return console.log "#{answer.url}
+                          do has err:#{err} 剩余队列数#{queue.length()}" if err
+                  console.log "do ok #{answer.url} 剩余队列数:#{queue.length()}"
 
               else
                 console.log "already exits ==>", answer.url
-
 
           self.getColList(data.paging.next)
 

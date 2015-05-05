@@ -20,7 +20,7 @@
 
   q = async.queue(function(data, cb) {
     var g;
-    console.log("" + data.url + " add queue");
+    console.log("" + data.url + " now do");
     g = new GetAnswer(data.url, data.noteStore);
     return async.series([
       function(callback) {
@@ -34,7 +34,7 @@
       }
     ], function(err) {
       if (err) {
-        return console.log("" + data.url + " do hase err:" + err);
+        return cb(err);
       }
       return cb();
     });
@@ -108,13 +108,13 @@
         return _results;
       });
       imgs = $("img");
+      console.log("" + self.title + " find img length => " + imgs.length);
       return async.eachSeries(imgs, function(item, callback) {
         var src;
         src = $(item).attr('data-actualsrc');
         if (!src) {
           src = $(item).attr('src');
         }
-        console.log("src ==>", src);
         return self.readImgRes(src, function(err, resource) {
           var hexHash, md5, newTag;
           if (err) {
@@ -133,6 +133,7 @@
           return callback();
         });
       }, function() {
+        console.log("" + self.title + " " + imgs.length + " imgs down ok");
         self.enContent = $.html({
           xmlMode: true,
           decodeEntities: false
@@ -146,14 +147,12 @@
       self = this;
       return makeNote(this.noteStore, this.title, this.tagArr, this.enContent, this.sourceUrl, this.resourceArr, function(err, note) {
         if (err) {
-          console.log(self.content);
-          console.log(self.enContent);
-        }
-        if (err) {
-          return saveErr(self.url, 6, {
-            err: err,
-            title: self.title
-          }, cb);
+          if (err) {
+            return saveErr(self.url, 6, {
+              err: err,
+              title: self.title
+            }, cb);
+          }
         }
         console.log("+++++++++++++++++++++++");
         console.log("" + note.title + " create ok");

@@ -68,8 +68,11 @@
                     return queue.push({
                       url: answer.url,
                       noteStore: self.noteStore
-                    }, function() {
-                      return console.log("do ok ==>", answer.url);
+                    }, function(err) {
+                      if (err) {
+                        return console.log("" + answer.url + " do has err:" + err + " 剩余队列数" + (queue.length()));
+                      }
+                      return console.log("do ok " + answer.url + " 剩余队列数:" + (queue.length()));
                     });
                   } else {
                     return console.log("already exits ==>", answer.url);

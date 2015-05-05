@@ -8,7 +8,7 @@ SyncLog = require('../models/sync-log')
 saveErr = require('../server/errInfo')
 
 q = async.queue (data, cb) ->
-  console.log "#{data.url} add queue"
+  console.log "#{data.url} now do"
   g = new GetAnswer(data.url, data.noteStore)
   async.series [
     (callback) ->
@@ -24,7 +24,7 @@ q = async.queue (data, cb) ->
       g.saveLog(callback)
 
   ],(err) ->
-    return console.log "#{data.url} do hase err:#{err}" if err
+    return cb(err) if err
     cb()
 , 2
 
@@ -86,12 +86,12 @@ class GetAnswer
           $(this).removeAttr(k)
 
     imgs = $("img")
+    console.log "#{self.title} find img length => #{imgs.length}"
     async.eachSeries imgs, (item, callback) ->
       src = $(item).attr('data-actualsrc')
       if not src
         src = $(item).attr('src')
 
-      console.log "src ==>",src
       self.readImgRes src, (err, resource) ->
         return saveErr(src, 5, {err:err, title:self.title, url:self.url}, cb) if err
 
@@ -105,6 +105,7 @@ class GetAnswer
         callback()
 
     ,() ->
+      console.log "#{self.title} #{imgs.length} imgs down ok"
       self.enContent = $.html({xmlMode:true, decodeEntities: false})
 
       cb()
@@ -115,9 +116,7 @@ class GetAnswer
     makeNote @noteStore, @title, @tagArr, @enContent, @sourceUrl, @resourceArr,
       (err, note) ->
         if err
-          console.log self.content
-          console.log self.enContent
-        return saveErr(self.url, 6, {err:err, title:self.title}, cb) if err
+          return saveErr(self.url, 6, {err:err, title:self.title}, cb) if err
 
         console.log "+++++++++++++++++++++++"
         console.log "#{note.title} create ok"
