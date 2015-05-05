@@ -65,7 +65,6 @@ class GetAnswer
 
     request.get op, (err, res, body) ->
       return saveErr(op.url, 3, {err:err, fun:'getContent'},cb) if err
-      console.log body
       data = JSON.parse(body)
       self.title = data.question.title
       self.tagArr = []

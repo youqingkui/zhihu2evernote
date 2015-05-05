@@ -80,7 +80,6 @@
             fun: 'getContent'
           }, cb);
         }
-        console.log(body);
         data = JSON.parse(body);
         self.title = data.question.title;
         self.tagArr = [];
