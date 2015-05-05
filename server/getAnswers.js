@@ -146,6 +146,9 @@
       self = this;
       return makeNote(this.noteStore, this.title, this.tagArr, this.enContent, this.sourceUrl, this.resourceArr, function(err, note) {
         if (err) {
+          console.log(self.enContent);
+        }
+        if (err) {
           return saveErr(self.url, 6, {
             err: err,
             title: self.title

@@ -114,6 +114,8 @@ class GetAnswer
     self = @
     makeNote @noteStore, @title, @tagArr, @enContent, @sourceUrl, @resourceArr,
       (err, note) ->
+        if err
+          console.log self.enContent
         return saveErr(self.url, 6, {err:err, title:self.title}, cb) if err
 
         console.log "+++++++++++++++++++++++"
