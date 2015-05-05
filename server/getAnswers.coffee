@@ -150,6 +150,7 @@ class GetAnswer
         request.get op, (err, res, body) ->
           return cb(err) if err
           mimeType = res.headers['content-type']
+          mimeType = mimeType.split(';')[0]
           callback(null, body, mimeType)
 
       enImg:['readImg', (callback, result) ->

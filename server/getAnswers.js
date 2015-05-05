@@ -192,6 +192,7 @@
               return cb(err);
             }
             mimeType = res.headers['content-type'];
+            mimeType = mimeType.split(';')[0];
             return callback(null, body, mimeType);
           });
         },
