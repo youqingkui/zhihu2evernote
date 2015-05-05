@@ -14,7 +14,7 @@
 
   rule.hour = 10;
 
-  rule.minute = 25;
+  rule.minute = 30;
 
   j = schedule.scheduleJob(rule, function() {
     var g, url;
