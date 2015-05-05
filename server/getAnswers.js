@@ -32,7 +32,10 @@
       }, function(callback) {
         return g.saveLog(callback);
       }
-    ], function() {
+    ], function(err) {
+      if (err) {
+        return console.log("" + data.url + " do hase err:" + err);
+      }
       return cb();
     });
   }, 2);
@@ -66,7 +69,8 @@
       self = this;
       op = {
         url: self.url,
-        headers: self.headers
+        headers: self.headers,
+        gzip: true
       };
       return request.get(op, function(err, res, body) {
         var data;
@@ -76,6 +80,7 @@
             fun: 'getContent'
           }, cb);
         }
+        console.log(body);
         data = JSON.parse(body);
         self.title = data.question.title;
         self.tagArr = [];
@@ -104,7 +109,7 @@
         return _results;
       });
       imgs = $("img");
-      return async.each(imgs, function(item, callback) {
+      return async.eachSeries(imgs, function(item, callback) {
         var src;
         src = $(item).attr('data-actualsrc');
         if (!src) {
@@ -141,7 +146,6 @@
       var self;
       self = this;
       return makeNote(this.noteStore, this.title, this.tagArr, this.enContent, this.sourceUrl, this.resourceArr, function(err, note) {
-        console.log("@@@ " + self.title + " @@@@@");
         if (err) {
           return saveErr(self.url, 6, {
             err: err,

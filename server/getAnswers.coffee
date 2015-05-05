@@ -23,7 +23,8 @@ q = async.queue (data, cb) ->
     (callback) ->
       g.saveLog(callback)
 
-  ],() ->
+  ],(err) ->
+    return console.log "#{data.url} do hase err:#{err}" if err
     cb()
 , 2
 
@@ -59,11 +60,12 @@ class GetAnswer
     op = {
       url:self.url
       headers:self.headers
+      gzip:true
     }
 
     request.get op, (err, res, body) ->
       return saveErr(op.url, 3, {err:err, fun:'getContent'},cb) if err
-
+      console.log body
       data = JSON.parse(body)
       self.title = data.question.title
       self.tagArr = []
@@ -77,7 +79,6 @@ class GetAnswer
   # 转换内容
   changeContent: (cb) ->
     self = @
-#    return console.log "!!!!!!!!!!!!!"
     $ = cheerio.load(self.content, {decodeEntities: false})
     $("a, span, img, i, div, code")
     .map (i, elem) ->
@@ -86,11 +87,11 @@ class GetAnswer
           $(this).removeAttr(k)
 
     imgs = $("img")
-    async.each imgs, (item, callback) ->
+    async.eachSeries imgs, (item, callback) ->
       src = $(item).attr('data-actualsrc')
       if not src
-#        console.log item
         src = $(item).attr('src')
+
       console.log "src ==>",src
       self.readImgRes src, (err, resource) ->
         return saveErr(src, 5, {err:err, title:self.title, url:self.url}, cb) if err
@@ -114,7 +115,6 @@ class GetAnswer
     self = @
     makeNote @noteStore, @title, @tagArr, @enContent, @sourceUrl, @resourceArr,
       (err, note) ->
-        console.log "@@@ #{self.title} @@@@@"
         return saveErr(self.url, 6, {err:err, title:self.title}, cb) if err
 
         console.log "+++++++++++++++++++++++"

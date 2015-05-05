@@ -29,8 +29,7 @@ class GetCol
     async.auto
       getList:(cb) ->
         requrest.get op, (err, res, body) ->
-          if err
-            return saveErr op.url, 1, {err:err}
+          return saveErr op.url, 1, {err:err} if err
 
           data = JSON.parse(body)
           cb(null, data)
@@ -58,24 +57,6 @@ class GetCol
           console.log data
 
       ]
-
-
-##      console.log data
-#      if data.data.length
-#        for i in data.data
-#          SyncLog.findOne {href:i.url}, (err2, row) ->
-#            return console.log err2 if err2
-#            if not row
-#              console.log "#{i.url} add queue, queue ==> #{queue.length()}"
-#              queue.push {url:i.url, noteStore:self.noteStore}, () ->
-#                console.log "do ok ==>", i.url
-#            else
-#              console.log "aleary save", row.href
-#
-#        self.getColList(data.paging.next)
-#
-#      else
-#        console.log data
 
 
   getColInfo:() ->
