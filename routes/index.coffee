@@ -62,7 +62,7 @@ router.get '/oauth_callback', (req, res) ->
       client.getAccessToken oauthToken, oauthTokenSecret, oauth_verifier,
         (err, oauthAccessToken, oauthAccessTokenSecret, results) ->
           if err
-            return console.log "err", err if err
+            return res.send "oauth err" if err
 
           console.log "oauthAccessToken =>", oauthAccessToken
           console.log "oauthAccessTokenSecret =>", oauthAccessTokenSecret
@@ -117,6 +117,7 @@ router.get '/oauth_callback', (req, res) ->
       salt = Math.random().toString(36).substr(2)
       newUser = new User()
       newUser.username = username
+      newUser.oauthAccessToken = token
       newUser.edamShard = resInfo.edamShard
       newUser.edamUserId = resInfo.edamUserId
       newUser.edamExpires = resInfo.edamExpires
@@ -131,7 +132,7 @@ router.get '/oauth_callback', (req, res) ->
         return console.log err if err
 
         newUser.save (err2, row) ->
-          return console.log err2
+          return console.log err2 if err2
 
           return res.send "create ok"
     ]
@@ -140,16 +141,17 @@ router.get '/oauth_callback', (req, res) ->
 
 
 
-router.get '/user/:token', (req, res) ->
-  token = req.params.token
-  client = new Evernote.Client
-    token:token
-
-  userStore = client.getUserStore()
-  userStore.getUser (err, user) ->
+router.get '/user/', (req, res) ->
+  User.findOne {username:'youqingkui'}, (err, row) ->
     return console.log err if err
 
-    console.log user
+    console.log row
+    res.send row
+
+
+router.get '/test_login', (req, res) ->
+  req.session.username = 'youqingkui'
+  return res.send "ok login"
 
 
 

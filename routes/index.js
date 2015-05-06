@@ -74,7 +74,7 @@
         return client.getAccessToken(oauthToken, oauthTokenSecret, oauth_verifier, function(err, oauthAccessToken, oauthAccessTokenSecret, results) {
           if (err) {
             if (err) {
-              return console.log("err", err);
+              return res.send("oauth err");
             }
           }
           console.log("oauthAccessToken =>", oauthAccessToken);
@@ -142,6 +142,7 @@
           salt = Math.random().toString(36).substr(2);
           newUser = new User();
           newUser.username = username;
+          newUser.oauthAccessToken = token;
           newUser.edamShard = resInfo.edamShard;
           newUser.edamUserId = resInfo.edamUserId;
           newUser.edamExpires = resInfo.edamExpires;
@@ -158,7 +159,9 @@
               return console.log(err);
             }
             return newUser.save(function(err2, row) {
-              return console.log(err2);
+              if (err2) {
+                return console.log(err2);
+              }
               return res.send("create ok");
             });
           });
@@ -167,19 +170,21 @@
     });
   });
 
-  router.get('/user/:token', function(req, res) {
-    var client, token, userStore;
-    token = req.params.token;
-    client = new Evernote.Client({
-      token: token
-    });
-    userStore = client.getUserStore();
-    return userStore.getUser(function(err, user) {
+  router.get('/user/', function(req, res) {
+    return User.findOne({
+      username: 'youqingkui'
+    }, function(err, row) {
       if (err) {
         return console.log(err);
       }
-      return console.log(user);
+      console.log(row);
+      return res.send(row);
     });
+  });
+
+  router.get('/test_login', function(req, res) {
+    req.session.username = 'youqingkui';
+    return res.send("ok login");
   });
 
   module.exports = router;

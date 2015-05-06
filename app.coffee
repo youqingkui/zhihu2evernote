@@ -7,6 +7,8 @@ cookieParser = require('cookie-parser')
 session = require('express-session')
 bodyParser = require('body-parser')
 routes = require('./routes/index')
+col = require('./routes/collection')
+user = require('./routes/users')
 app = express()
 
 accessLog = fs.createWriteStream 'access.log',
@@ -35,6 +37,13 @@ app.use express.static(path.join(__dirname, 'public'))
 
 app.use logger 'combined', {stream: accessLog}
 app.use '/', routes
+app.use '/users', user
+
+app.use '/collection', (req, res, next) ->
+  if not req.session.username
+    return res.send "need login"
+  else next()
+,col
 
 # catch 404 and forward to error handler
 app.use (req, res, next) ->
