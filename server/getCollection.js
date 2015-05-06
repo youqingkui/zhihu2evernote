@@ -66,9 +66,18 @@
                     });
                   }
                   if (row) {
-                    return console.log("already exits ==>", url);
+                    return console.log("already exits ==>", answer.url);
                   } else {
-                    return self.addTask(url, function(err2) {});
+                    return self.addTask(answer.url, function(err2, status) {
+                      if (err2) {
+                        console.log(err2);
+                      }
+                      if (status === 3) {
+                        return console.log("" + answer.url + " do {error}");
+                      } else if (status === 4) {
+                        return console.log("" + answer.url + " do ok");
+                      }
+                    });
                   }
                 });
               });
@@ -81,36 +90,36 @@
       });
     };
 
-    GetCol.prototype.checkTask = function(url, cb) {
-      var self;
-      self = this;
-      return Task.findOne({
-        url: url
-      }, function(err, row) {
-        if (err) {
-          return cb(err);
-        }
-        if (row) {
-          return console.log("already exits ==>", url);
-        } else {
-          return self.addTask(url, cb);
-        }
-      });
-    };
-
     GetCol.prototype.addTask = function(url, cb) {
       var self;
       self = this;
-      return queue.push({
-        url: url,
-        noteStore: self.noteStore
-      }, function(err) {
-        if (err) {
-          console.log(err);
-          return self.changeStatus(url, 2, cb);
-        } else {
-          return self.changeStatus(url, 3, cb);
-        }
+      return async.auto({
+        addDB: function(callback) {
+          var task;
+          task = new Task;
+          task.url = url;
+          return task.save(function(err, row) {
+            if (err) {
+              return cb(err);
+            }
+            return callback();
+          });
+        },
+        addDo: [
+          'addDB', function(callback) {
+            return queue.push({
+              url: url,
+              noteStore: self.noteStore
+            }, function(err) {
+              if (err) {
+                console.log(err);
+                return self.changeStatus(url, 3, cb);
+              } else {
+                return self.changeStatus(url, 4, cb);
+              }
+            });
+          }
+        ]
       });
     };
 
@@ -121,7 +130,7 @@
             url: url
           }, function(err, row) {
             if (err) {
-              return cb(err);
+              return cb(err, status);
             }
             if (row) {
               return callback(null, row);
@@ -137,7 +146,7 @@
               if (err) {
                 return cb(err);
               }
-              return cb();
+              return cb(null, status);
             });
           }
         ]

@@ -6,11 +6,16 @@ Evernote = require('evernote').Evernote
 crypto = require('crypto')
 SyncLog = require('../models/sync-log')
 saveErr = require('../server/errInfo')
+Task = require('../models/task')
+
 
 q = async.queue (data, cb) ->
   console.log "#{data.url} now do"
   g = new GetAnswer(data.url, data.noteStore)
   async.series [
+    (callback) ->
+      g.changeStatus(callback)
+
     (callback) ->
       g.getContent(callback)
 
@@ -20,8 +25,8 @@ q = async.queue (data, cb) ->
     (callback) ->
       g.createNote(callback)
 
-    (callback) ->
-      g.saveLog(callback)
+#    (callback) ->
+#      g.saveLog(callback)
 
   ],(err) ->
     return cb(err) if err
@@ -53,6 +58,21 @@ class GetAnswer
       'Content-Type':'application/json'
     }
     @resourceArr = []
+
+  changeStatus:(cb) ->
+    self = @
+    Task.findOne {url:self.url, status:1}, (err, row) ->
+      return cb(err) if err
+
+      if row
+        row.status = 2
+        row.save (err2, row2) ->
+          return cb(err2) if err2
+          cb()
+
+      else
+        console.log "changeStatus not find url:#{self.url}"
+        cb()
 
 
   getContent:(cb) ->

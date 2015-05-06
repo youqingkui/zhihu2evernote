@@ -44,11 +44,15 @@ class GetCol
               return saveErr url, 2, {err:err, answer:answer.url} if err
 
               if row
-                console.log "already exits ==>", url
+                console.log "already exits ==>", answer.url
 
               else
-                self.addTask url, (err2) ->
-                  
+                self.addTask answer.url, (err2, status) ->
+                  console.log err2 if err2
+                  if status is 3
+                    console.log "#{answer.url} do {error}"
+                  else if status is 4
+                    console.log "#{answer.url} do ok"
 
           self.getColList(data.paging.next)
 
@@ -58,35 +62,35 @@ class GetCol
       ]
 
 
-  checkTask:(url, cb) ->
-    self = @
-
-    Task.findOne {url:url}, (err, row) ->
-      return cb(err) if err
-
-      if row
-        console.log "already exits ==>", url
-
-      else
-        self.addTask(url, cb)
 
 
   addTask:(url, cb) ->
     self = @
-    queue.push {url:url, noteStore:self.noteStore}, (err) ->
-      if err
-        console.log err
-        self.changeStatus url, 2, cb
+    async.auto
+      addDB:(callback) ->
+        task = new Task
+        task.url = url
+        task.save (err, row) ->
+          return cb(err) if err
 
-      else
-        self.changeStatus url, 3, cb
+          callback()
 
+      addDo:['addDB', (callback) ->
+        queue.push {url:url, noteStore:self.noteStore}, (err) ->
+          if err
+            console.log err
+            self.changeStatus url, 3, cb
+
+          else
+            self.changeStatus url, 4, cb
+
+      ]
 
   changeStatus: (url, status, cb) ->
     async.auto
       findUrl:(callback) ->
         Task.findOne {url:url}, (err, row) ->
-          return cb(err) if err
+          return cb(err, status) if err
 
           callback(null, row) if row
 
@@ -97,7 +101,7 @@ class GetCol
         row.save (err, row) ->
           return cb(err) if err
 
-          cb()
+          cb(null, status)
       ]
 
 
