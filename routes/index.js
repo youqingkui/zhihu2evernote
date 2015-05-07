@@ -170,6 +170,58 @@
     });
   });
 
+  router.get('/login', function(req, res) {
+    console.log(req.session.username);
+    return res.render('login', {
+      title: '登录',
+      username: ''
+    });
+  });
+
+  router.post('/login', function(req, res) {
+    var password, username;
+    username = (req.body.username || '').trim();
+    password = (req.body.password || '').trim();
+    return async.auto({
+      findUser: function(cb) {
+        return User.findOne({
+          username: username
+        }, function(err, row) {
+          var error;
+          if (err) {
+            return console.log(err);
+          }
+          if (!row) {
+            error = "没有此用户或者密码错误";
+            return res.render('login', {
+              title: '登入',
+              error: error,
+              username: username
+            });
+          }
+          return cb(null, row);
+        });
+      },
+      checkPWD: [
+        'findUser', function(cb, result) {
+          var error, md5Pwd, user;
+          user = result.findUser;
+          md5Pwd = md5(password + user.salt);
+          if (md5Pwd !== user.password) {
+            error = "密码错误";
+            return res.render('login', {
+              title: '登入',
+              error: error,
+              username: username
+            });
+          }
+          req.session.username = user.username;
+          return res.redirect('/');
+        }
+      ]
+    });
+  });
+
   router.get('/user/', function(req, res) {
     return User.findOne({
       username: 'youqingkui'

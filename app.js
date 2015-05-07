@@ -62,6 +62,15 @@
     stream: accessLog
   }));
 
+  app.use(function(req, res, next) {
+    res.locals.username = req.session.username;
+    res.locals.error = req.session.error;
+    res.locals.success = req.session.success;
+    req.session.error = null;
+    req.session.success = null;
+    return next();
+  });
+
   app.use('/', routes);
 
   app.use('/users', user);

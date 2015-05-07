@@ -1,0 +1,12 @@
+if error
+  div.alert.alert-warning.alert-dismissible.fade.in
+    button.close(data-dismiss="alert")
+      span(aria-hidden="true") x
+      span.sr-only Close
+    strong= error
+else if success
+  div.alert.alert-success.alert-dismissible.fade.in
+    button.close(data-dismiss="alert")
+      span(aria-hidden="true") x
+      span.sr-only Close
+    strong= success

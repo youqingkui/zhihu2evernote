@@ -140,6 +140,38 @@ router.get '/oauth_callback', (req, res) ->
 
 
 
+router.get '/login', (req, res) ->
+  console.log req.session.username
+  return res.render 'login', {title:'登录', username:''}
+
+router.post '/login', (req, res) ->
+  username = (req.body.username || '').trim()
+  password = (req.body.password || '').trim()
+
+  async.auto
+    findUser:(cb) ->
+      User.findOne {username:username}, (err, row) ->
+        return console.log err if err
+
+        if not row
+          error = "没有此用户或者密码错误"
+          return res.render 'login',
+            {title:'登入', error:error, username:username}
+
+        cb(null, row)
+
+    checkPWD:['findUser', (cb, result) ->
+      user = result.findUser
+      md5Pwd = md5(password + user.salt)
+      if md5Pwd != user.password
+        error = "密码错误"
+        return res.render 'login',
+          {title:'登入', error:error, username:username}
+
+      req.session.username = user.username
+      return res.redirect('/')
+    ]
+
 
 router.get '/user/', (req, res) ->
   User.findOne {username:'youqingkui'}, (err, row) ->
