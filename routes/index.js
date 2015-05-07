@@ -173,8 +173,7 @@
   router.get('/login', function(req, res) {
     console.log(req.session.username);
     return res.render('login', {
-      title: '登录',
-      username: ''
+      title: '登录'
     });
   });
 

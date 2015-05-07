@@ -142,7 +142,7 @@ router.get '/oauth_callback', (req, res) ->
 
 router.get '/login', (req, res) ->
   console.log req.session.username
-  return res.render 'login', {title:'登录', username:''}
+  return res.render 'login', {title:'登录'}
 
 router.post '/login', (req, res) ->
   username = (req.body.username || '').trim()
